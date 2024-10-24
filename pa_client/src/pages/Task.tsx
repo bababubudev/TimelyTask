@@ -1,13 +1,11 @@
-import { Link } from "react-router-dom"
+import Header from "../components/Header"
 
 function Task() {
   return (
-    <Link
-      to={"/Option"}
-      style={{ fontSize: "3rem" }}
-    >
-      Tasks
-    </Link>
+    <>
+      <Header />
+      <h1>Tasks</h1>
+    </>
   )
 }
 

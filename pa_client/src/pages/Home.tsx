@@ -1,14 +1,13 @@
-import { Link } from "react-router-dom"
+import Header from "../components/Header"
 
 function Home() {
-
   return (
-    <Link
-      to={"/Task"}
-      style={{ fontSize: "3rem" }}
-    >
-      Home
-    </Link>
+    <>
+      <Header />
+      <div className="home-page">
+        <h1>Home</h1>
+      </div>
+    </>
   )
 }
 

@@ -1,13 +1,11 @@
-import { Link } from "react-router-dom"
+import Header from "../components/Header"
 
 function Option() {
   return (
-    <Link
-      to={"/"}
-      style={{ fontSize: "3rem" }}
-    >
-      Options
-    </Link>
+    <>
+      <Header />
+      <h1>Options</h1>
+    </>
   )
 }
 

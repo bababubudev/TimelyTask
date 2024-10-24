@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "./pages/Home";
-import Task from "./pages/Task";
-import Option from "./pages/Options";
+import Home from "../pages/Home";
+import Task from "../pages/Task";
+import Option from "../pages/Options";
 
 const router = createBrowserRouter([
   {
@@ -9,11 +9,11 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
-    path: "/Task",
+    path: "/task",
     element: <Task />,
   },
   {
-    path: "/Option",
+    path: "/option",
     element: <Option />,
   }
 ]);
