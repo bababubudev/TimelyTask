@@ -1,14 +1,60 @@
 header {
+  position: fixed;
+  top: 1.5rem;
+  right: 0;
+
+  background: var(--col-white);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  font-size: 1.5rem;
+
   nav {
+    padding: 0 min(5rem, 5vw);
+
     .header-list {
+      min-height: 5rem;
       list-style-type: none;
 
       margin: 0;
-      padding: 0;
+      padding: 0.5rem;
 
       display: flex;
-      justify-content: center;
-      gap: 1rem;
+      justify-content: end;
+      align-items: center;
+      gap: min(5rem, 5vw);
+
+      li {
+        padding: 1rem;
+        text-transform: uppercase;
+      }
+
+      a {
+        color: var(--col-window-bg);
+        text-decoration: none;
+        position: relative;
+        display: flex;
+
+        &.active-link {
+          color: var(--col-secondary);
+
+          &::after {
+            $bottom-bar-width: 2rem;
+
+            position: absolute;
+            top: 100%;
+            left: calc(50% - ($bottom-bar-width / 2));
+
+            align-self: center;
+
+            content: "";
+            width: $bottom-bar-width;
+            height: 0.2rem;
+
+            background: var(--col-secondary);
+            border-radius: 1rem;
+            z-index: 1;
+          }
+        }
+      }
     }
   }
 }

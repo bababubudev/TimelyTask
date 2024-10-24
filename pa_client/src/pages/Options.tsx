@@ -6,30 +6,37 @@ function Option() {
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
 
   return (
-    <>
+    <div className="page option-page">
       <Header />
-      <div className="option-page">
-        <h1>Options</h1>
-        <button onClick={() => setIsAboutOpen(prev => !prev)}>About</button>
+      <h1>Options</h1>
+      <div className="content option-content">
+        <button onClick={() => setIsAboutOpen(prev => !prev)}>Information</button>
         <Modal
           isInfo={true}
-          dialogue="About this app"
-          description={`
-            One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin.
-            He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections.
-            The bedding was hardly able to cover it and seemed ready to slide off any moment. His many legs, pitifully thin compared with the size of the rest of him,
-            waved about helplessly as he looked. "What's happened to me?" he thought. It wasn't a dream. His room, a proper human room although a little too small,
-            lay peacefully between its four familiar walls. A collection of textile samples lay spread out on the table - Samsa was a travelling salesman
-            - and above it there hung a picture that he had recently cut out of an illustrated magazine and housed in a nice, gilded frame.
-            It showed a lady fitted out with a fur hat and fur boa who sat upright, raising a heavy fur muff that covered the whole of her lower arm towards the viewer.
-            Gregor then turned to look out the window at the dull weather.`
+          dialogue="Info"
+          description={
+            <>
+              <h2>Author: Prabesh Sharma</h2>
+              <br />
+              <h2>Instructions:</h2>
+              <div className="instructions" style={{ marginLeft: "2rem" }}>
+                <ul>
+                  <li>you can change views from top of the app</li>
+                  <li>some other instructions</li>
+                </ul>
+              </div>
+              <br />
+              <h2>References/Sources</h2>
+              <h2>Working hours [5hr]</h2>
+              <h2>Most difficult</h2>
+            </>
           }
           isOpen={isAboutOpen}
           onConfirm={() => setIsAboutOpen(false)}
           onCancel={() => setIsAboutOpen(false)}
         />
       </div>
-    </>
+    </div>
   )
 }
 

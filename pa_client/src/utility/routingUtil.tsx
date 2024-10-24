@@ -3,7 +3,13 @@ import Home from "../pages/Home";
 import Task from "../pages/Task";
 import Option from "../pages/Options";
 
-const router = createBrowserRouter([
+export const routes = [
+  { path: "/", label: "Home" },
+  { path: "/task", label: "Tasks" },
+  { path: "/option", label: "Options" }
+];
+
+export const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
@@ -17,5 +23,3 @@ const router = createBrowserRouter([
     element: <Option />,
   }
 ]);
-
-export default router;

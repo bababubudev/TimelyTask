@@ -4,7 +4,7 @@ interface ModalProps {
   isInfo?: boolean;
   isOpen: boolean;
   dialogue: string;
-  description?: string;
+  description?: string | JSX.Element;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -34,7 +34,12 @@ function Modal({ isInfo = false, dialogue, description, isOpen, onConfirm, onCan
     <div className={`modal-overlay ${isOpen ? "visible" : "hidden"} ${isInfo ? "info-pnl" : ""}`}>
       <div ref={modalRef} className={`modal-content ${isOpen ? "visible" : "hidden"}`}>
         <h1>{dialogue}</h1>
-        <p>{description}</p>
+        <div className="description">
+          {typeof description === "string"
+            ? <p>{description}</p>
+            : description
+          }
+        </div>
         <div className="modal-buttons">
           {!isInfo &&
             <button

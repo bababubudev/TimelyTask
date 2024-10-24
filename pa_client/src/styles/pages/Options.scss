@@ -1,0 +1,24 @@
+@use "../components/Modal.scss";
+
+.option-content {
+  display: grid;
+  justify-content: center;
+
+  >button {
+    padding: 1rem;
+
+    font-weight: bolder;
+    color: var(--col-white);
+    border: 2px solid var(--col-primary);
+    background: none;
+    border-radius: 1rem;
+
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      border: 2px solid none;
+      background: var(--col-primary);
+      color: var(--col-window-bg);
+    }
+  }
+}
