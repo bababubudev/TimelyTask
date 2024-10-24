@@ -3,12 +3,18 @@ header {
   top: 1.5rem;
   right: 0;
 
-  background: var(--col-white);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   font-size: 1.5rem;
+
+  img {
+    position: absolute;
+    width: 150px;
+    left: 0;
+  }
 
   nav {
     padding: 0 min(5rem, 5vw);
+    background: var(--col-white);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 
     .header-list {
       min-height: 5rem;
@@ -34,7 +40,7 @@ header {
         display: flex;
 
         &.active-link {
-          color: var(--col-secondary);
+          color: var(--col-primary);
 
           &::after {
             $bottom-bar-width: 2rem;
@@ -49,7 +55,7 @@ header {
             width: $bottom-bar-width;
             height: 0.2rem;
 
-            background: var(--col-secondary);
+            background: var(--col-primary);
             border-radius: 1rem;
             z-index: 1;
           }

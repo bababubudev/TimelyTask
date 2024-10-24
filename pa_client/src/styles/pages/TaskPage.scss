@@ -1,0 +1,10 @@
+@use "../components/TaskCard.scss";
+
+.tasks-display {
+  display: grid;
+  justify-content: center;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 1rem;
+  padding: 1rem;
+}

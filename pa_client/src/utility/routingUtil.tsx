@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "../pages/Home";
-import Task from "../pages/Task";
-import Option from "../pages/Options";
+import Home from "../pages/HomePage";
+import Task from "../pages/TaskPage";
+import Option from "../pages/OptionsPage";
 
 export const routes = [
   { path: "/", label: "Home" },
