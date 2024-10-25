@@ -43,28 +43,16 @@ function Task() {
     fetchData();
   }, []);
 
-  const fetchSpecifiedData = async (id: number): Promise<task | void> => {
-    if (id === -1) {
-      return emptyTask;
-    }
-
-    try {
-      const taskResponse = await fetch(`${BASE_URL}/tasks/${id}`, { method: "GET" });
-      const taskJson: task[] = await taskResponse.json();
-
-      return taskJson[0];
-    }
-    catch (err) {
-      console.log(err);
-      return { ...emptyTask, id: -2 };
-    }
-  }
-
-  const onCardClicked = async (id: number) => {
+  const onCardClicked = (id: number) => {
     setIsEditorOpen(true);
-    const cardDetails = await fetchSpecifiedData(id);
 
-    if (typeof cardDetails !== "object") return;
+    if (id < -1) return;
+    if (id < 0) {
+      setSelectedTask({ ...emptyTask, name: "" });
+      return;
+    }
+
+    const cardDetails: task = tasks.filter(elem => elem.id === id)[0];
     setSelectedTask(cardDetails);
   }
 
@@ -98,19 +86,23 @@ function Task() {
             description={
               <form onSubmit={e => e.preventDefault()}>
                 <label htmlFor="task-name">
+                  Task name
                   <input
                     type="text"
-                    value={selectedTask.name}
                     id="task-name"
+                    value={selectedTask.name}
                     onChange={e => {
                       const value = e.target.value;
                       setSelectedTask({ ...selectedTask, name: value });
                     }}
                   />
                 </label>
+                <br />
                 <label htmlFor="task-tags">
+                  Tags
                   <input
                     type="text"
+                    id="task-tags"
                     value={selectedTask.tags}
                     onChange={e => {
                       const value = e.target.value;
