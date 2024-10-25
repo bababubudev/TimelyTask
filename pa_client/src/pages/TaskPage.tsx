@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import Header from "../components/Header"
 import TaskCard from "../components/TaskCard";
-import type { mappedTag, tag, task } from "../utility/types";
 import Modal from "../components/Modal";
+import { mapIDsToNames, mapNamesToIds } from "../utility/tagMapping";
+import type { mappedTag, tag, task } from "../utility/types";
 
 function Task() {
   const BASE_URL = "http://127.0.0.1:3010";
@@ -15,8 +16,11 @@ function Task() {
 
   const [tasks, setTasks] = useState<task[]>([]);
   const [tagMap, setTagMap] = useState<mappedTag>({});
+
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [selectedTask, setSelectedTask] = useState<task>(emptyTask);
+
+  const [tagInput, setTagInput] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,6 +40,7 @@ function Task() {
         setTagMap(tagMap);
       }
       catch (err) {
+        //? Handle fetch error
         console.log(err);
       }
     };
@@ -45,15 +50,34 @@ function Task() {
 
   const onCardClicked = (id: number) => {
     setIsEditorOpen(true);
-
-    if (id < -1) return;
-    if (id < 0) {
-      setSelectedTask({ ...emptyTask, name: "" });
+    if (id < -1) {
+      //? Handle fetch error
       return;
     }
 
-    const cardDetails: task = tasks.filter(elem => elem.id === id)[0];
+    const cardDetails: task = tasks.find(elem => elem.id === id) || { ...emptyTask, name: "" };
     setSelectedTask(cardDetails);
+  };
+
+  const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    setTagInput(input);
+
+
+    const validTag = Object.values(tagMap).includes(input);
+    if (validTag) handleTagSelect(input);
+  }
+
+  const handleTagSelect = (tagName: string) => {
+    const tagId = mapNamesToIds([tagName], tagMap);
+
+    //* inserts unique tags only
+    if (!selectedTask.tags.split(",").includes(tagId)) {
+      const updatedTags = selectedTask.tags ? `${selectedTask.tags},${tagId}` : tagId;
+      setSelectedTask(prev => ({ ...prev, tags: updatedTags }));
+    }
+
+    setTagInput("");
   }
 
   return (
@@ -66,50 +90,63 @@ function Task() {
             <TaskCard
               key={elem.id}
               currentTask={elem}
-              taskTags={elem.tags}
-              tagMap={tagMap}
+              taskTags={mapIDsToNames(elem.tags, tagMap)}
               onCardClicked={onCardClicked}
             />
           ))}
           <TaskCard
             isAdderTag={true}
             currentTask={emptyTask}
-            taskTags=""
-            tagMap={{ 0: "" }}
+            taskTags={[""]}
             onCardClicked={onCardClicked}
           />
         </ul>
         {selectedTask.id > -2 &&
           <Modal
             isOpen={isEditorOpen}
-            dialogue={selectedTask.id >= 0 ? "Edit" : "Add"}
+            dialogue={selectedTask.id >= 0 ? "Edit task" : "Add a task"}
             description={
               <form onSubmit={e => e.preventDefault()}>
                 <label htmlFor="task-name">
                   Task name
-                  <input
-                    type="text"
-                    id="task-name"
-                    value={selectedTask.name}
-                    onChange={e => {
-                      const value = e.target.value;
-                      setSelectedTask({ ...selectedTask, name: value });
-                    }}
-                  />
                 </label>
+                <input
+                  type="text"
+                  id="task-name"
+                  placeholder="Add task name"
+                  value={selectedTask.name}
+                  onChange={e => {
+                    const value = e.target.value;
+                    setSelectedTask({ ...selectedTask, name: value });
+                  }}
+                  required
+                />
                 <br />
                 <label htmlFor="task-tags">
                   Tags
-                  <input
-                    type="text"
-                    id="task-tags"
-                    value={selectedTask.tags}
-                    onChange={e => {
-                      const value = e.target.value;
-                      setSelectedTask({ ...selectedTask, id: Number(value) });
-                    }}
-                  />
                 </label>
+                <input
+                  type="text"
+                  id="task-tags"
+                  autoComplete="off"
+                  placeholder="Add tags"
+                  list="suggestions"
+                  value={tagInput}
+                  onChange={handleTagChange}
+                />
+                <datalist id="suggestions">
+                  {Object.values(tagMap).map((elem, i) => (
+                    <option key={i} value={elem}>{tagMap[elem]}</option>
+                  ))}
+                </datalist>
+                <br />
+                <div className="selected-tags">
+                  {mapIDsToNames(selectedTask.tags, tagMap).map((tag, index) => (
+                    <span key={index} className="tag-chip">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </form>
             }
             onConfirm={() => setIsEditorOpen(false)}

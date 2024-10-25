@@ -1,15 +1,13 @@
-import type { mappedTag, tag } from "../utility/types";
+import type { tag } from "../utility/types";
 
 interface TaskCardProps {
   isAdderTag?: boolean;
   currentTask: tag;
-  taskTags: string;
-  tagMap: mappedTag;
+  taskTags: string[];
   onCardClicked: (id: number) => void;
 }
 
-function TaskCard({ isAdderTag = false, currentTask, taskTags, tagMap, onCardClicked }: TaskCardProps) {
-  const matchedTag = taskTags.split(",").map(elem => tagMap[elem]);
+function TaskCard({ isAdderTag = false, currentTask, taskTags, onCardClicked }: TaskCardProps) {
 
   return (
     <div
@@ -18,7 +16,7 @@ function TaskCard({ isAdderTag = false, currentTask, taskTags, tagMap, onCardCli
     >
       <h2 className="task-name">{currentTask.name}</h2>
       <div className="tag-list">
-        {matchedTag && matchedTag.map((elem, i) => (
+        {taskTags && taskTags.map((elem, i) => (
           <span key={i} className={`tag-name ${elem === "important" ? "imp" : ""}`}>{elem}</span>
         ))}
       </div>
