@@ -33,12 +33,15 @@
 
 .tag-list {
   height: 5rem;
+
   overflow-y: scroll;
+  overflow-x: hidden;
 
   display: flex;
   align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
+
   column-gap: 0.5rem;
   row-gap: 0.2rem;
 
@@ -56,7 +59,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--col-primary);
+    background: var(--col-secondary);
     border-radius: 0.5rem;
   }
 
@@ -91,11 +94,11 @@
   border: none;
 
   span {
-    $currentSize: min(10rem, 15vw);
+    $currentSize: min(10rem, 30vw);
 
     position: absolute;
     bottom: -1rem;
-    left: calc(60% - ($currentSize / 2));
+    left: calc(55% - ($currentSize / 2));
 
     opacity: 0.3;
     font-weight: 600;

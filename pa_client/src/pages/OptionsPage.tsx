@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "../components/Header"
 import Modal from "../components/Modal";
+import { modalType } from "../utility/types";
 
 function Option() {
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
@@ -12,7 +13,7 @@ function Option() {
       <div className="content option-content">
         <button onClick={() => setIsAboutOpen(prev => !prev)}>Information</button>
         <Modal
-          isInfo={true}
+          type={modalType.info}
           dialogue="Info"
           description={
             <>
@@ -22,7 +23,7 @@ function Option() {
               <div className="instructions" style={{ marginLeft: "2rem" }}>
                 <ul>
                   <li>you can change views from top of the app</li>
-                  <li>some other instructions</li>
+                  <li>to add new task click on add task with + icon on it</li>
                 </ul>
               </div>
               <br />

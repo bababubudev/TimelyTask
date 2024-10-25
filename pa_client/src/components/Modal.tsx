@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
+import { modalType } from "../utility/types";
 
 interface ModalProps {
-  isInfo?: boolean;
+  type?: modalType
   isOpen: boolean;
   dialogue: string;
   description?: string | JSX.Element;
@@ -9,8 +10,9 @@ interface ModalProps {
   onCancel: () => void;
 }
 
-function Modal({ isInfo = false, dialogue, description, isOpen, onConfirm, onCancel }: ModalProps) {
+function Modal({ type = modalType.alert, dialogue, description, isOpen, onConfirm, onCancel }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const isInfo = type === modalType.info;
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -53,7 +55,7 @@ function Modal({ isInfo = false, dialogue, description, isOpen, onConfirm, onCan
             onClick={(e) => { e.stopPropagation(); onCancel() }}
             className="cancel-btn"
           >
-            <p>{isInfo ? "Got it" : "Cancel"}</p>
+            {isInfo ? "Got it" : "Cancel"}
           </button>
         </div>
       </div>

@@ -1,4 +1,14 @@
-export type theme = "light" | "dark" | "default"
+export enum theme {
+  "light",
+  "dark",
+  "default"
+}
+
+export enum modalType {
+  "info",
+  "alert",
+  "form"
+}
 
 export type task = {
   id: number,

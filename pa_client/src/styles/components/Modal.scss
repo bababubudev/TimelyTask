@@ -84,12 +84,14 @@
     }
 
     .confirm-btn {
-      background-color: var(--col-accent);
+      background-color: var(--col-primary);
       color: var(--col-white);
     }
 
     .cancel-btn {
-      background-color: var(--col-primary);
+      border: 2px solid var(--col-window-bg);
+      background: none;
+
       color: var(--col-window-bg);
     }
   }
