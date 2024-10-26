@@ -23,7 +23,7 @@ function Task() {
   const [selectedTask, setSelectedTask] = useState<task>(emptyTask);
 
   const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
@@ -109,10 +109,12 @@ function Task() {
       setLoading(true);
       setError(null);
 
+      console.log(tagName);
+
       const postResponse = await fetch(`${BASE_URL}/tags`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tagName })
+        body: JSON.stringify({ name: tagName })
       });
 
       const { id } = await postResponse.json();
@@ -127,7 +129,6 @@ function Task() {
     }
   };
 
-  //? Should be called only when data changed
   const editTask = async (updatedTask: task) => {
     const { id, name, tags } = updatedTask;
 
