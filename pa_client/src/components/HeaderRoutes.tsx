@@ -6,12 +6,12 @@ function HeaderRoutes() {
 
   return (
     <ul className="header-list">
-      {routes.map((route) => {
+      {routes.map((route, i) => {
         const isCurrent = location.pathname === route.path;
 
         return (
           <li
-            key={route.path}
+            key={i}
             className={isCurrent ? "active-list" : ""}
           >
             <Link

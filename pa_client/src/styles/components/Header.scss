@@ -2,7 +2,9 @@ header {
   position: fixed;
   top: 1.5rem;
   right: 0;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
+
+  transition: transform 0.1s ease;
 
   nav {
     width: 60vw;
@@ -59,10 +61,18 @@ header {
       }
     }
   }
+
+  &.hide {
+    transform: translateX(100%);
+  }
 }
 
 @media screen and (max-width: 650px) {
-  header nav {
-    width: unset;
+  header {
+    font-size: 1.25rem;
+
+    nav {
+      width: unset;
+    }
   }
 }
