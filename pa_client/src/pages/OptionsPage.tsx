@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Header from "../components/Header"
 import Modal from "../components/Modal";
-import { modalType } from "../utility/types";
+import { ModalType } from "../utility/types";
 
 function Option() {
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
@@ -13,7 +13,7 @@ function Option() {
       <div className="content option-content">
         <button onClick={() => setIsAboutOpen(prev => !prev)}>Information</button>
         <Modal
-          type={modalType.info}
+          type={ModalType.info}
           dialogue="Info"
           description={
             <>

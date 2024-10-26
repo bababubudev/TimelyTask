@@ -8,3 +8,21 @@
   gap: 1rem;
   padding: 1rem;
 }
+
+@media screen and (min-width: 1200px) {
+  .tasks-display {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .tasks-display {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .tasks-display {
+    grid-template-columns: 1fr;
+  }
+}

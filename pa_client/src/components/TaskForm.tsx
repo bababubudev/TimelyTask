@@ -6,9 +6,10 @@ interface TaskFormProp {
   tagMap: mappedTag;
   selectedTask: task;
   setSelectedTask: (currentTask: task) => void;
+  removeSelectedTask: () => void;
 }
 
-function TaskForm({ tagMap, selectedTask, setSelectedTask }: TaskFormProp) {
+function TaskForm({ tagMap, selectedTask, setSelectedTask, removeSelectedTask }: TaskFormProp) {
   const [tagInput, setTagInput] = useState<string>("");
 
   const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -17,7 +18,7 @@ function TaskForm({ tagMap, selectedTask, setSelectedTask }: TaskFormProp) {
 
     const validTag = Object.values(tagMap).includes(input);
     if (validTag) handleTagSelect(input);
-  }
+  };
 
   const handleTagSelect = (tagName: string) => {
     const tagId = mapNamesToIds([tagName], tagMap);
@@ -29,10 +30,23 @@ function TaskForm({ tagMap, selectedTask, setSelectedTask }: TaskFormProp) {
     }
 
     setTagInput("");
-  }
+  };
+
+  const handleTagRemove = (tagName: string) => {
+    const tagId = mapNamesToIds([tagName], tagMap);
+
+    if (selectedTask.tags.split(",").includes(tagId)) {
+      const updatedTags = selectedTask.tags
+        .split(",")
+        .filter(id => id !== tagId)
+        .join(",");
+
+      setSelectedTask({ ...selectedTask, tags: updatedTags });
+    }
+  };
 
   return (
-    <form onSubmit={e => e.preventDefault()}>
+    <>
       <label htmlFor="task-name">
         Task name
       </label>
@@ -41,6 +55,7 @@ function TaskForm({ tagMap, selectedTask, setSelectedTask }: TaskFormProp) {
         id="task-name"
         placeholder="Add task name"
         value={selectedTask.name}
+        autoComplete="off"
         onChange={e => {
           const value = e.target.value;
           setSelectedTask({ ...selectedTask, name: value });
@@ -68,12 +83,25 @@ function TaskForm({ tagMap, selectedTask, setSelectedTask }: TaskFormProp) {
       <br />
       <div className="selected-tags">
         {mapIDsToNames(selectedTask.tags, tagMap).map((tag, index) => (
-          <span key={index} className="tag-chip">
+          <button
+            key={index}
+            type="button"
+            className="tag-chip"
+            onClick={() => handleTagRemove(tag)}
+          >
             {tag}
-          </span>
+          </button>
         ))}
       </div>
-    </form>
+      {selectedTask.id >= 0 &&
+        <button
+          type="button"
+          onClick={removeSelectedTask}
+        >
+          remove task
+        </button>
+      }
+    </>
   );
 }
 

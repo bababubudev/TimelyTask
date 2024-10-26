@@ -32,10 +32,8 @@
 }
 
 .tag-list {
-  height: 5rem;
-
-  overflow-y: scroll;
-  overflow-x: hidden;
+  // overflow-y: scroll;
+  // overflow-x: hidden;
 
   display: flex;
   align-items: flex-start;
@@ -48,7 +46,7 @@
   padding: 0.5rem;
   border-radius: 0.5rem;
 
-  background-color: var(--col-window-bg);
+  // background-color: var(--col-window-bg-faded);
 
   &::-webkit-scrollbar {
     width: 0.5rem;
@@ -73,19 +71,20 @@
   text-align: center;
 
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
-  color: var(--col-white);
+  color: var(--col-window-bg);
 
   border-radius: 1rem;
   padding: 0.2rem 0.8rem;
 
   &.imp {
     background-color: var(--col-primary);
+    color: var(--col-white);
   }
 }
 
 .adder-tag {
   .tag-list {
-    background-color: var(--col-window-bg);
+    background-color: transparent;
   }
 }
 

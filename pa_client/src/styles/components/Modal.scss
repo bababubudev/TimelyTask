@@ -39,12 +39,12 @@
 
   &.visible {
     animation-name: bounce-in;
-    animation-duration: 0.3s;
-    animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in;
     opacity: 1;
 
     @keyframes bounce-in {
-      50% {
+      0% {
         transform: scale(1.1);
       }
 
@@ -57,7 +57,7 @@
   &.hidden {
     transform: scale(0.9);
     opacity: 0;
-    transition: transform 0.5s, opacity 0.3s ease;
+    transition: transform 0.2s, opacity 0.2s ease;
   }
 
   h1 {
@@ -76,7 +76,7 @@
     margin-top: 1rem;
 
     button {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 0.3rem;
@@ -84,15 +84,37 @@
     }
 
     .confirm-btn {
-      background-color: var(--col-primary);
-      color: var(--col-white);
+      background-color: var(--col-accent);
+      color: var(--col-window-bg);
     }
 
     .cancel-btn {
-      border: 2px solid var(--col-window-bg);
-      background: none;
+      background-color: var(--col-window-bg);
+      color: var(--col-white);
+    }
+  }
 
+  &.form .modal-buttons {
+    .confirm-btn {
+      background-color: var(--col-primary);
+      color: var(--col-white);
+      transition: background-color 0.1s;
+
+      &:disabled {
+        background-color: var(--col-window-bg-faded);
+      }
+    }
+
+    .cancel-btn {
+      background: var(--col-accent);
       color: var(--col-window-bg);
+    }
+  }
+
+  &.info .modal-buttons {
+    .cancel-btn {
+      background-color: var(--col-secondary);
+      color: var(--col-white);
     }
   }
 }

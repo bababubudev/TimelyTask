@@ -4,11 +4,13 @@ export enum theme {
   "default"
 }
 
-export enum modalType {
+export enum ModalType {
   "info",
   "alert",
   "form"
 }
+
+export type action = "GET" | "POST" | "PUT"
 
 export type task = {
   id: number,

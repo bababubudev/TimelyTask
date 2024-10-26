@@ -8,7 +8,6 @@ interface TaskCardProps {
 }
 
 function TaskCard({ isAdderTag = false, currentTask, taskTags, onCardClicked }: TaskCardProps) {
-
   return (
     <div
       className={`task-card ${isAdderTag ? "adder-tag" : ""}`}
