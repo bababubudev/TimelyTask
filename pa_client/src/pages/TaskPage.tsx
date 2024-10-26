@@ -5,6 +5,7 @@ import Modal from "../components/Modal";
 import { mapIDsToNames } from "../utility/tagMapping";
 import { ModalType, type mappedTag, type tag, type task } from "../utility/types";
 import TaskForm from "../components/TaskForm";
+import { findDataWithID, isEqual, isNewData } from "../utility/utilityFunctions";
 
 function Task() {
   const BASE_URL = "http://127.0.0.1:3010";
@@ -14,6 +15,8 @@ function Task() {
     name: "Add new task",
     tags: ""
   };
+
+  const defError = "Something went wrong :/";
 
   const [tasks, setTasks] = useState<task[]>([]);
   const [tagMap, setTagMap] = useState<mappedTag>({});
@@ -59,7 +62,7 @@ function Task() {
       setTagMap(tagMap);
     }
     catch (err) {
-      setError(new Error("Something went wrong :/"));
+      setError(new Error(defError));
       console.log(err);
     }
     finally {
@@ -94,8 +97,37 @@ function Task() {
     finally {
       setLoading(false);
     }
-  }
+  };
 
+  const addTag = async (tagName: string) => {
+    console.log("adding new tag", tagName);
+
+    const isExisting = Object.values(tagMap).includes(tagName);
+    if (isExisting) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const postResponse = await fetch(`${BASE_URL}/tags`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagName })
+      });
+
+      const { id } = await postResponse.json();
+      setTagMap(prev => ({ ...prev, [id]: tagName }));
+    }
+    catch (err) {
+      setError(new Error("Adding task failed"));
+      console.log("[ Adding task failed ]\n", err);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+  //? Should be called only when data changed
   const editTask = async (updatedTask: task) => {
     const { id, name, tags } = updatedTask;
 
@@ -123,8 +155,9 @@ function Task() {
   };
 
   const deleteTask = async (id: number) => {
+    console.log("deleting task", selectedTask);
     setIsAlertOpen(false);
-    setIsAlertOpen(false);
+    setIsEditorOpen(false);
 
     try {
       setLoading(true);
@@ -142,11 +175,9 @@ function Task() {
   };
 
   const onCardClicked = (id: number) => {
-    console.log(isEditorOpen);
-
     setIsEditorOpen(true);
     if (id < -1) {
-      setError(new Error("Something went wrong :/"))
+      setError(new Error(defError))
       return;
     }
 
@@ -156,14 +187,14 @@ function Task() {
 
   const handleOnConfirm = (id: number) => {
     setIsEditorOpen(false);
-    if (selectedTask.name === "" || selectedTask.tags === "") {
-      setError(new Error("Input was invalid"));
+    if (selectedTask.name === "" || (id > -1 && !isNewData<task>(tasks, selectedTask))) {
+      setError(new Error("Input was invalid or unchanged"));
       console.log("Invalid input");
       return;
     }
 
     if (id < -1) {
-      setError(new Error("Something went wrong :/"))
+      setError(new Error(defError))
       return;
     }
     else if (id === -1) {
@@ -171,6 +202,17 @@ function Task() {
       console.log("adding task", selectedTask);
     }
     else {
+      const current = findDataWithID<task>(tasks, id);
+      if (!current) {
+        setError(new Error(defError));
+        return;
+      }
+
+      if (isEqual<task>(current, selectedTask)) {
+        setError(new Error("Data did not change"));
+        return;
+      };
+
       editTask(selectedTask);
       console.log("editing task", selectedTask);
     }
@@ -187,7 +229,7 @@ function Task() {
               key={elem.id}
               currentTask={elem}
               taskTags={mapIDsToNames(elem.tags, tagMap)}
-              onCardClicked={(id) => { onCardClicked(id); console.log(id); }}
+              onCardClicked={(id) => onCardClicked(id)}
             />
           ))}
           <TaskCard
@@ -199,7 +241,10 @@ function Task() {
         </ul>
         {selectedTask.id > -2 &&
           <Modal
-            isDisabled={selectedTask.name === "" || selectedTask.tags === ""}
+            isDisabled={
+              selectedTask.name === "" ||
+              (selectedTask.id > -1 && !isNewData<task>(tasks, selectedTask))
+            }
             type={ModalType.form}
             isOpen={isEditorOpen}
             dialogue={selectedTask.id >= 0 ? "Edit task" : "Add a task"}
@@ -207,6 +252,7 @@ function Task() {
               <TaskForm
                 tagMap={tagMap}
                 selectedTask={selectedTask}
+                createTag={addTag}
                 setSelectedTask={setSelectedTask}
                 removeSelectedTask={() => setIsAlertOpen(true)}
               />

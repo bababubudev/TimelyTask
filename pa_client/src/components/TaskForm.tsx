@@ -1,16 +1,24 @@
 import { ChangeEvent, useState } from "react";
-import { mappedTag, task } from "../utility/types";
+import { mappedTag, ModalType, task } from "../utility/types";
 import { mapIDsToNames, mapNamesToIds } from "../utility/tagMapping";
+import Modal from "./Modal";
 
 interface TaskFormProp {
   tagMap: mappedTag;
   selectedTask: task;
+  createTag: (name: string) => void;
   setSelectedTask: (currentTask: task) => void;
   removeSelectedTask: () => void;
 }
 
-function TaskForm({ tagMap, selectedTask, setSelectedTask, removeSelectedTask }: TaskFormProp) {
+function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSelectedTask }: TaskFormProp) {
   const [tagInput, setTagInput] = useState<string>("");
+  const [addAlert, setAddAlert] = useState<boolean>(false);
+
+  const validAddition = !Object.values(tagMap)
+    .includes(tagInput) &&
+    tagInput !== "" &&
+    tagInput.length >= 3;
 
   const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -45,6 +53,14 @@ function TaskForm({ tagMap, selectedTask, setSelectedTask, removeSelectedTask }:
     }
   };
 
+  const handleTagAddition = () => {
+    if (!validAddition) { console.log("Invalid input"); return; }
+
+    createTag(tagInput);
+    setAddAlert(false);
+    setTagInput("");
+  };
+
   return (
     <>
       <label htmlFor="task-name">
@@ -70,11 +86,19 @@ function TaskForm({ tagMap, selectedTask, setSelectedTask, removeSelectedTask }:
         type="text"
         id="task-tags"
         autoComplete="off"
-        placeholder="Add tags"
+        placeholder="Choose an existing tag"
         list="suggestions"
         value={tagInput}
         onChange={handleTagChange}
       />
+      <button
+        type="button"
+        className="add-tag-btn"
+        onClick={() => setAddAlert(true)}
+        disabled={!validAddition}
+      >
+        create tag +
+      </button>
       <datalist id="suggestions">
         {Object.values(tagMap).map((elem, i) => (
           <option key={i} value={elem}>{tagMap[elem]}</option>
@@ -100,6 +124,17 @@ function TaskForm({ tagMap, selectedTask, setSelectedTask, removeSelectedTask }:
         >
           remove task
         </button>
+      }
+      {validAddition &&
+        <Modal
+          type={ModalType.alert}
+          isOpen={addAlert}
+          dialogue="Create tag?"
+          description={`Are you sure you want to add tag: ${tagInput}?`}
+          onConfirm={handleTagAddition}
+          onCancel={() => setAddAlert(false)}
+          zIndex={20}
+        />
       }
     </>
   );
