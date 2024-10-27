@@ -1,6 +1,8 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { mappedTag, ModalType, task } from "../utility/types";
 import { mapIDsToNames, mapNamesToIds } from "../utility/tagMapping";
+import { FaAngleLeft } from "react-icons/fa";
+import { AiFillDelete } from "react-icons/ai";
 import Modal from "./Modal";
 
 interface TaskFormProp {
@@ -12,6 +14,7 @@ interface TaskFormProp {
 }
 
 function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSelectedTask }: TaskFormProp) {
+  const selectedTagsRef = useRef<HTMLDivElement>(null);
   const [tagInput, setTagInput] = useState<string>("");
   const [addAlert, setAddAlert] = useState<boolean>(false);
 
@@ -61,68 +64,106 @@ function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSele
     setTagInput("");
   };
 
+  const scrollLeft = () => {
+    if (selectedTagsRef.current) {
+      selectedTagsRef.current.scrollBy({
+        left: -100,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollRight = () => {
+    if (selectedTagsRef.current) {
+      selectedTagsRef.current.scrollBy({
+        left: 100,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <>
-      <label htmlFor="task-name">
-        Task name
-      </label>
-      <input
-        type="text"
-        id="task-name"
-        placeholder="Add task name"
-        value={selectedTask.name}
-        autoComplete="off"
-        onChange={e => {
-          const value = e.target.value;
-          setSelectedTask({ ...selectedTask, name: value });
-        }}
-        required
-      />
+      <div className="name-area">
+        <label
+          className={`${selectedTask.name !== "" ? "has-text" : ""}`}
+          htmlFor="task-name">
+          Task name
+        </label>
+        <input
+          type="text"
+          id="task-name"
+          placeholder="Name of the task"
+          value={selectedTask.name}
+          autoComplete="off"
+          onChange={e => {
+            const value = e.target.value;
+            setSelectedTask({ ...selectedTask, name: value });
+          }}
+          required
+        />
+      </div>
       <br />
-      <label htmlFor="task-tags">
-        Tags
-      </label>
-      <input
-        type="text"
-        id="task-tags"
-        autoComplete="off"
-        placeholder="Choose an existing tag"
-        list="suggestions"
-        value={tagInput}
-        onChange={handleTagChange}
-      />
-      <button
-        type="button"
-        className="add-tag-btn"
-        onClick={() => setAddAlert(true)}
-        disabled={!validAddition}
-      >
-        create tag +
-      </button>
-      <datalist id="suggestions">
-        {Object.values(tagMap).map((elem, i) => (
-          <option key={i} value={elem}>{tagMap[elem]}</option>
-        ))}
-      </datalist>
+      <div className="tag-area">
+        <label
+          className={`${tagInput !== "" ? "has-text" : ""}`}
+          htmlFor="task-tags"
+        >
+          Tags
+        </label>
+        <input
+          type="text"
+          id="task-tags"
+          autoComplete="off"
+          placeholder="Choose existing or create tag"
+          list="suggestions"
+          value={tagInput}
+          onChange={handleTagChange}
+        />
+        <datalist id="suggestions">
+          {Object.values(tagMap).map((elem, i) => (
+            <option key={i} value={elem}>{tagMap[elem]}</option>
+          ))}
+        </datalist>
+      </div>
       <br />
-      <div className="selected-tags">
-        {mapIDsToNames(selectedTask.tags, tagMap).map((tag, index) => (
-          <button
-            key={index}
-            type="button"
-            className="tag-chip"
-            onClick={() => handleTagRemove(tag)}
-          >
-            {tag}
-          </button>
-        ))}
+      <div className="tag-btns">
+        <button type="button" className="scroll-btn left" onClick={scrollLeft}>
+          <FaAngleLeft />
+        </button>
+        <div className="selected-tags" ref={selectedTagsRef}>
+          {mapIDsToNames(selectedTask.tags, tagMap).map((tag, index) => (
+            <button
+              key={index}
+              type="button"
+              className="tag-chip"
+              onClick={() => handleTagRemove(tag)}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+        <button type="button" className="scroll-btn right" onClick={scrollRight}>
+          <FaAngleLeft />
+        </button>
+
+        <button
+          type="button"
+          className="add-tag-btn"
+          onClick={() => setAddAlert(true)}
+          disabled={!validAddition}
+        >
+          create tag +
+        </button>
       </div>
       {selectedTask.id >= 0 &&
         <button
+          title="delete task"
           type="button"
+          className="remove-btn"
           onClick={removeSelectedTask}
         >
-          remove task
+          <AiFillDelete />
         </button>
       }
       {validAddition &&

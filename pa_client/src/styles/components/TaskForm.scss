@@ -1,0 +1,242 @@
+form {
+  position: relative;
+
+  .description {
+    .name-area {
+      label {
+        $transition-speed: 0.05s;
+        position: absolute;
+        top: 0.7rem;
+        left: 0.7rem;
+
+        background: none;
+        color: var(--col-window-bg-faded);
+
+        font-size: 1.25rem;
+
+        transition: left $transition-speed linear,
+          top $transition-speed linear,
+          font-size $transition-speed linear,
+          background-color $transition-speed linear;
+      }
+
+      input::placeholder {
+        color: transparent;
+      }
+
+      &:focus-within label,
+      label.has-text {
+        top: -0.75rem;
+        left: 0.5rem;
+
+        font-size: 1rem;
+        background: var(--col-white);
+        color: var(--col-window-bg);
+      }
+
+      &:focus-within input {
+        &::placeholder {
+          color: var(--col-window-bg-faded);
+        }
+      }
+    }
+
+    .name-area,
+    .tag-area {
+      display: grid;
+      position: relative;
+
+      input {
+        font-size: 1.25rem;
+        outline: none;
+
+        color: var(--col-window-bg);
+        background: none;
+        border: 2px solid var(--col-window-bg);
+        border-radius: 0.25rem;
+
+        padding: 0.75rem;
+
+        &:focus {
+          border: 2px solid var(--col-secondary);
+        }
+
+        &::placeholder {
+          font-family: monospace;
+          font-size: 1.25rem;
+        }
+      }
+    }
+
+    .tag-area {
+      label {
+        position: absolute;
+        top: -0.75rem;
+        left: 0.5rem;
+
+        background: var(--col-white);
+      }
+    }
+  }
+}
+
+.tag-btns {
+  margin-top: 0.5rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 7rem;
+
+  .scroll-btn {
+    display: flex;
+    position: absolute;
+    top: 0;
+
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+
+    background: none;
+    color: var(--col-window-bg-faded);
+    backdrop-filter: blur(0.1rem);
+
+    &.left {
+      left: 0;
+      border-top-left-radius: 0.25rem;
+      border-bottom-left-radius: 0.25rem;
+    }
+
+    &.right {
+      right: 7rem;
+
+      svg {
+        rotate: 180deg;
+      }
+    }
+
+    svg {
+      width: 1.75rem;
+      height: 2.15rem;
+    }
+  }
+
+  .add-tag-btn {
+    justify-self: end;
+    padding: 0.75rem;
+    background: var(--col-window-bg);
+    color: var(--col-white);
+
+    border: none;
+    border-radius: 0.25rem;
+
+    &:disabled {
+      background: var(--col-window-bg-faded);
+    }
+  }
+
+  .selected-tags {
+    background: var(--col-window-bg-faded);
+    display: flex;
+    gap: 0.5rem;
+
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+
+    padding-inline: 2.5rem;
+    padding-block: 0.35rem;
+
+    overflow-x: scroll;
+    scrollbar-gutter: stable;
+
+    .info {
+      position: absolute;
+      top: -1.2rem;
+      left: 0;
+      display: flex;
+      align-items: center;
+
+      background: var(--col-window-bg-faded);
+      border-radius: 0.25rem 0.25rem 0 0;
+
+      >p {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: var(--col-white);
+        background: none;
+        padding: 0 0.5rem;
+      }
+
+      svg {
+        display: flex;
+        fill: var(--col-white);
+      }
+    }
+
+    >button {
+      font-size: 0.85rem;
+      border-radius: 1rem;
+      border: none;
+      padding: 0 1rem;
+      color: var(--col-window-bg);
+
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: line-through;
+        background-color: var(--col-accent);
+      }
+
+      &:active {
+        text-decoration: line-through;
+        background-color: var(--col-window-bg-faded);
+        color: var(--col-white);
+      }
+    }
+
+    &::-webkit-scrollbar {
+      height: 0rem;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--col-secondary);
+      border-radius: 0.5rem;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--col-secondary);
+    }
+  }
+}
+
+.remove-btn {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  svg {
+    width: 2rem;
+    height: 2rem;
+    fill: var(--col-accent);
+
+    filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.25));
+  }
+
+  &:active {
+    svg {
+      fill: var(--col-window-bg);
+    }
+  }
+}
