@@ -1,27 +1,28 @@
-import { ChangeEvent, useRef, useState } from "react";
-import { mappedTag, ModalType, task } from "../utility/types";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { mappedTag, task } from "../utility/types";
 import { mapIDsToNames, mapNamesToIds } from "../utility/tagMapping";
 import { FaAngleLeft } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
-import Modal from "./Modal";
+import TagForm from "./TagForm";
+import { IoInformationCircle } from "react-icons/io5";
 
 interface TaskFormProp {
+  isDisabled: boolean;
   tagMap: mappedTag;
   selectedTask: task;
   createTag: (name: string) => void;
   setSelectedTask: (currentTask: task) => void;
+  handleTaskSubmission: (id: number) => void;
+  removeTagWithID: (id: number) => void;
   removeSelectedTask: () => void;
 }
 
-function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSelectedTask }: TaskFormProp) {
+function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask, handleTaskSubmission, removeSelectedTask, removeTagWithID }: TaskFormProp) {
   const selectedTagsRef = useRef<HTMLDivElement>(null);
-  const [tagInput, setTagInput] = useState<string>("");
-  const [addAlert, setAddAlert] = useState<boolean>(false);
 
-  const validAddition = !Object.values(tagMap)
-    .includes(tagInput) &&
-    tagInput !== "" &&
-    tagInput.length >= 3;
+  const [tagInput, setTagInput] = useState<string>("");
+  const [createTagForm, setCreateTagForm] = useState<boolean>(false);
+  const [removeTagAlert, setRemoveAlert] = useState<boolean>(false);
 
   const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -56,12 +57,15 @@ function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSele
     }
   };
 
-  const handleTagAddition = () => {
-    if (!validAddition) { console.log("Invalid input"); return; }
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (createTagForm || isDisabled) {
+        return;
+      }
 
-    createTag(tagInput);
-    setAddAlert(false);
-    setTagInput("");
+      handleTaskSubmission(selectedTask.id);
+    }
   };
 
   const scrollLeft = () => {
@@ -73,14 +77,34 @@ function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSele
     }
   };
 
-  const scrollRight = () => {
+  const scrollRight = (amt = 100) => {
     if (selectedTagsRef.current) {
       selectedTagsRef.current.scrollBy({
-        left: 100,
+        left: amt,
         behavior: "smooth",
       });
     }
   };
+
+  useEffect(() => {
+    const handleGlobalClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.classList.contains("modal-overlay")) {
+        if (createTagForm) setCreateTagForm(false);
+        if (removeTagAlert) setRemoveAlert(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleGlobalClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleGlobalClick);
+    };
+  }, [createTagForm, removeTagAlert]);
+
+  useEffect(() => {
+    scrollRight(1920);
+  }, []);
 
   return (
     <>
@@ -100,7 +124,7 @@ function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSele
             const value = e.target.value;
             setSelectedTask({ ...selectedTask, name: value });
           }}
-          required
+          onKeyDown={handleKeyDown}
         />
       </div>
       <br />
@@ -115,10 +139,11 @@ function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSele
           type="text"
           id="task-tags"
           autoComplete="off"
-          placeholder="Choose existing or create tag"
+          placeholder="Choose a tag"
           list="suggestions"
           value={tagInput}
           onChange={handleTagChange}
+          onKeyDown={handleKeyDown}
         />
         <datalist id="suggestions">
           {Object.values(tagMap).map((elem, i) => (
@@ -131,29 +156,33 @@ function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSele
         <button type="button" className="scroll-btn left" onClick={scrollLeft}>
           <FaAngleLeft />
         </button>
+        {selectedTask.tags.length > 0 &&
+          <div className="selected-tags-info">
+            <IoInformationCircle />
+            <p>click on a tag to remove</p>
+          </div>
+        }
         <div className="selected-tags" ref={selectedTagsRef}>
           {mapIDsToNames(selectedTask.tags, tagMap).map((tag, index) => (
             <button
               key={index}
               type="button"
-              className="tag-chip"
               onClick={() => handleTagRemove(tag)}
             >
               {tag}
             </button>
           ))}
+          {selectedTask.tags.length === 0 && <p>chosen tasks show up here</p>}
         </div>
-        <button type="button" className="scroll-btn right" onClick={scrollRight}>
+        <button type="button" className="scroll-btn right" onClick={() => scrollRight()}>
           <FaAngleLeft />
         </button>
-
         <button
           type="button"
-          className="add-tag-btn"
-          onClick={() => setAddAlert(true)}
-          disabled={!validAddition}
+          className="modify-tag-btn"
+          onClick={() => setCreateTagForm(true)}
         >
-          create tag +
+          modify tags
         </button>
       </div>
       {selectedTask.id >= 0 &&
@@ -166,17 +195,14 @@ function TaskForm({ tagMap, selectedTask, createTag, setSelectedTask, removeSele
           <AiFillDelete />
         </button>
       }
-      {validAddition &&
-        <Modal
-          type={ModalType.alert}
-          isOpen={addAlert}
-          dialogue="Create tag?"
-          description={`Are you sure you want to add tag: ${tagInput}?`}
-          onConfirm={handleTagAddition}
-          onCancel={() => setAddAlert(false)}
-          zIndex={20}
-        />
-      }
+      {/* Modal for modifying tags*/}
+      <TagForm
+        createTagForm={createTagForm}
+        tagMap={tagMap}
+        createTag={createTag}
+        removeTagWithID={removeTagWithID}
+        setCreateTagForm={setCreateTagForm}
+      />
     </>
   );
 }

@@ -1,7 +1,8 @@
 form {
   position: relative;
 
-  .description {
+  .description,
+  .modal-overlay .child-form .description {
     .name-area {
       label {
         $transition-speed: 0.05s;
@@ -46,6 +47,10 @@ form {
       display: grid;
       position: relative;
 
+      label {
+        pointer-events: none;
+      }
+
       input {
         font-size: 1.25rem;
         outline: none;
@@ -77,6 +82,38 @@ form {
         background: var(--col-white);
       }
     }
+
+    .name-area.is-tag {
+      display: grid;
+      position: relative;
+
+      input {
+        padding-right: 5.25rem;
+      }
+
+      .add-tag-btn {
+        position: absolute;
+        right: 0;
+        top: -0.5rem;
+        height: 3.25rem;
+
+        margin-top: .5rem;
+        padding: 0.75rem;
+        background: var(--col-secondary);
+        color: var(--col-white);
+
+        border: none;
+        border-radius: 0 0.25rem 0.25rem 0;
+
+        &:disabled {
+          background: var(--col-window-bg-faded);
+        }
+
+        &:active {
+          background-color: var(--col-window-bg);
+        }
+      }
+    }
   }
 }
 
@@ -89,24 +126,26 @@ form {
   .scroll-btn {
     display: flex;
     position: absolute;
-    top: 0;
+    top: 0.2rem;
 
     border: none;
+    border-radius: 0.25rem;
+    padding-inline: 0.25rem;
     cursor: pointer;
-    padding: 0.25rem;
 
-    background: none;
-    color: var(--col-window-bg-faded);
+    background: var(--col-white-faded);
     backdrop-filter: blur(0.1rem);
 
+    svg {
+      color: var(--col-window-bg);
+    }
+
     &.left {
-      left: 0;
-      border-top-left-radius: 0.25rem;
-      border-bottom-left-radius: 0.25rem;
+      left: 0.2rem;
     }
 
     &.right {
-      right: 7rem;
+      right: 7.2rem;
 
       svg {
         rotate: 180deg;
@@ -117,9 +156,17 @@ form {
       width: 1.75rem;
       height: 2.15rem;
     }
+
+    &:active {
+      background: var(--col-window-bg-faded);
+
+      svg {
+        color: var(--col-white);
+      }
+    }
   }
 
-  .add-tag-btn {
+  .modify-tag-btn {
     justify-self: end;
     padding: 0.75rem;
     background: var(--col-window-bg);
@@ -131,6 +178,35 @@ form {
     &:disabled {
       background: var(--col-window-bg-faded);
     }
+
+    &:active {
+      background: var(--col-secondary);
+    }
+  }
+
+
+  .selected-tags-info {
+    position: absolute;
+    top: -1.25rem;
+    left: 0;
+    display: flex;
+    align-items: center;
+
+    background: none;
+    border-radius: 0.25rem;
+
+    >p {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--col-window-bg);
+      background: none;
+      padding: 0 0.5rem;
+    }
+
+    svg {
+      display: flex;
+      fill: var(--col-window-bg);
+    }
   }
 
   .selected-tags {
@@ -138,46 +214,29 @@ form {
     display: flex;
     gap: 0.5rem;
 
-    border-top-left-radius: 0.25rem;
-    border-bottom-left-radius: 0.25rem;
+    border-radius: 0.25rem;
 
-    padding-inline: 2.5rem;
+    padding-inline: 2.75rem;
     padding-block: 0.35rem;
 
     overflow-x: scroll;
     scrollbar-gutter: stable;
 
-    .info {
-      position: absolute;
-      top: -1.2rem;
-      left: 0;
-      display: flex;
-      align-items: center;
-
-      background: var(--col-window-bg-faded);
-      border-radius: 0.25rem 0.25rem 0 0;
-
-      >p {
-        font-family: monospace;
-        font-size: 0.85rem;
-        color: var(--col-white);
-        background: none;
-        padding: 0 0.5rem;
-      }
-
-      svg {
-        display: flex;
-        fill: var(--col-white);
-      }
+    p {
+      font-family: monospace;
+      align-self: center;
+      user-select: none;
     }
 
     >button {
       font-size: 0.85rem;
+      font-weight: bolder;
+
       border-radius: 1rem;
       border: none;
+
       padding: 0 1rem;
       color: var(--col-window-bg);
-
       box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
 
       white-space: nowrap;
@@ -237,6 +296,75 @@ form {
   &:active {
     svg {
       fill: var(--col-window-bg);
+    }
+  }
+}
+
+.all-tag-view {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+
+  margin-top: 1rem;
+  border: 2px solid var(--col-window-bg);
+  border-radius: 0.25rem;
+  padding: 1rem;
+
+  span {
+    background: var(--col-window-bg);
+    color: var(--col-white);
+
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    user-select: none;
+    cursor: pointer;
+
+    &:active {
+      background-color: var(--col-accent);
+      color: var(--col-window-bg);
+      text-decoration: line-through;
+    }
+  }
+
+  .info {
+    position: absolute;
+    top: -0.6rem;
+    padding: 0 0.25rem;
+    padding-right: 0.5rem;
+
+    max-height: 1rem;
+
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 1rem;
+
+    background-color: var(--col-white);
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    p {
+      font-family: monospace;
+      font-size: 0.85rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.alert {
+  .description>* {
+    font-family: monospace;
+  }
+
+  .modal-buttons {
+    .confirm-btn {
+      background: var(--col-accent) !important;
+      color: var(--col-window-bg) !important;
     }
   }
 }

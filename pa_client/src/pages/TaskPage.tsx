@@ -28,6 +28,9 @@ function Task() {
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
 
+  const isEditTaskDisabled = selectedTask.name === "" ||
+    (selectedTask.id > -1 && !isNewData<task>(tasks, selectedTask));
+
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -89,36 +92,7 @@ function Task() {
 
       const { id } = await postResponse.json();
       setTasks((prev) => [...prev, { id, name, tags }]);
-    }
-    catch (err) {
-      setError(new Error("Adding task failed"));
-      console.log("[ Adding task failed ]\n", err);
-    }
-    finally {
-      setLoading(false);
-    }
-  };
-
-  const addTag = async (tagName: string) => {
-    console.log("adding new tag", tagName);
-
-    const isExisting = Object.values(tagMap).includes(tagName);
-    if (isExisting) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      console.log(tagName);
-
-      const postResponse = await fetch(`${BASE_URL}/tags`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: tagName })
-      });
-
-      const { id } = await postResponse.json();
-      setTagMap(prev => ({ ...prev, [id]: tagName }));
+      console.log("adding task", { id, name, tags });
     }
     catch (err) {
       setError(new Error("Adding task failed"));
@@ -175,6 +149,57 @@ function Task() {
     }
   };
 
+  const addTag = async (tagName: string) => {
+    console.log("adding new tag", tagName);
+
+    const isExisting = Object.values(tagMap).includes(tagName);
+    if (isExisting) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log(tagName);
+
+      const postResponse = await fetch(`${BASE_URL}/tags`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: tagName })
+      });
+
+      const { id } = await postResponse.json();
+      setTagMap(prev => ({ ...prev, [id]: tagName }));
+    }
+    catch (err) {
+      setError(new Error("Adding task failed"));
+      console.log("[ Adding task failed ]\n", err);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+  const removeTag = async (id: number) => {
+    console.log("deleting tag", tagMap[id]);
+
+    try {
+      setLoading(true);
+      await fetch(`${BASE_URL}/tags/${id}`, { method: "DELETE" });
+
+      setTagMap(prev => {
+        const updatedEntries = Object.entries(prev).filter(([key]) => key !== id.toString());
+        return Object.fromEntries(updatedEntries);
+      });
+    }
+    catch (err) {
+      console.log("[ Deleting task failed ]\n", err);
+      setError(new Error("Deleting task failed"));
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
   const onCardClicked = (id: number) => {
     setIsEditorOpen(true);
     if (id < -1) {
@@ -186,7 +211,7 @@ function Task() {
     setSelectedTask(cardDetails);
   };
 
-  const handleOnConfirm = (id: number) => {
+  const handleTaskSubmission = (id: number) => {
     setIsEditorOpen(false);
     if (selectedTask.name === "" || (id > -1 && !isNewData<task>(tasks, selectedTask))) {
       setError(new Error("Input was invalid or unchanged"));
@@ -200,7 +225,6 @@ function Task() {
     }
     else if (id === -1) {
       addTask(selectedTask);
-      console.log("adding task", selectedTask);
     }
     else {
       const current = findDataWithID<task>(tasks, id);
@@ -242,23 +266,23 @@ function Task() {
         </ul>
         {selectedTask.id > -2 &&
           <Modal
-            isDisabled={
-              selectedTask.name === "" ||
-              (selectedTask.id > -1 && !isNewData<task>(tasks, selectedTask))
-            }
+            isDisabled={isEditTaskDisabled}
             type={ModalType.form}
             isOpen={isEditorOpen}
             dialogue={selectedTask.id >= 0 ? "Edit task" : "Add a task"}
             description={
               <TaskForm
+                isDisabled={isEditTaskDisabled}
                 tagMap={tagMap}
                 selectedTask={selectedTask}
                 createTag={addTag}
                 setSelectedTask={setSelectedTask}
+                handleTaskSubmission={handleTaskSubmission}
+                removeTagWithID={removeTag}
                 removeSelectedTask={() => setIsAlertOpen(true)}
               />
             }
-            onConfirm={() => handleOnConfirm(selectedTask.id)}
+            onConfirm={() => handleTaskSubmission(selectedTask.id)}
             onCancel={() => setIsEditorOpen(false)}
             zIndex={10}
           />

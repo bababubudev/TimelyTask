@@ -4,6 +4,7 @@ import { ModalType } from "../utility/types";
 interface ModalProps {
   zIndex?: number;
   type?: ModalType;
+  isChild?: boolean;
   isDisabled?: boolean;
   isOpen: boolean;
   dialogue: string;
@@ -15,6 +16,7 @@ interface ModalProps {
 function Modal({
   zIndex = 1,
   type = ModalType.info,
+  isChild = false,
   isDisabled,
   dialogue,
   description,
@@ -41,34 +43,54 @@ function Modal({
     };
   }, [isOpen, onCancel]);
 
+  const parentElement = (child: JSX.Element): JSX.Element => {
+    return isChild ? (
+      <div
+        ref={modalRef}
+        className={`child-form modal-content ${isOpen ? "visible" : "hidden"}`}
+        onSubmit={e => e.preventDefault()}
+      >
+        {child}
+      </div>
+    ) : (
+      <form
+        ref={formRef}
+        className={`form modal-content ${isOpen ? "visible" : "hidden"}`}
+        onSubmit={e => e.preventDefault()}
+      >
+        {child}
+      </form>
+    )
+  }
+
   const formType: JSX.Element = (
-    <form
-      ref={zIndex > 1 ? formRef : null}
-      className={`form modal-content ${isOpen ? "visible" : "hidden"}`}
-      onSubmit={e => e.preventDefault()}
-    >
-      <h1>{dialogue}</h1>
-      <div className="description">
-        {description}
-      </div>
-      <div className="modal-buttons">
-        <button
-          onClick={e => { e.stopPropagation(); onConfirm(); }}
-          className="confirm-btn"
-          type="submit"
-          disabled={isDisabled}
-        >
-          Submit
-        </button>
-        <button
-          onClick={e => { e.stopPropagation(); onCancel(); }}
-          className="cancel-btn"
-          type="button"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+    parentElement(
+      <>
+        <h1>{dialogue}</h1>
+        <div className="description">
+          {description}
+        </div>
+        {isChild ? null :
+          <div className="modal-buttons">
+            <button
+              onClick={e => { e.stopPropagation(); onConfirm(); }}
+              className="confirm-btn"
+              type="submit"
+              disabled={isDisabled}
+            >
+              Submit
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); onCancel(); }}
+              className="cancel-btn"
+              type="button"
+            >
+              Cancel
+            </button>
+          </div>
+        }
+      </>
+    )
   );
 
   const infoType: JSX.Element = (
@@ -82,7 +104,7 @@ function Modal({
           onClick={e => { e.stopPropagation(); onCancel(); }}
           className="cancel-btn"
         >
-          Got it
+          Done
         </button>
       </div>
     </div>
@@ -98,12 +120,14 @@ function Modal({
         <button
           onClick={e => { e.stopPropagation(); onConfirm(); }}
           className="confirm-btn"
+          type="button"
         >
           Confirm
         </button>
         <button
           onClick={onCancel}
           className="cancel-btn"
+          type="button"
         >
           Cancel
         </button>

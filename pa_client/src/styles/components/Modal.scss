@@ -21,7 +21,7 @@
   &.hidden {
     opacity: 0;
     pointer-events: none;
-    z-index: -10000;
+    z-index: -10000 !important;
   }
 }
 
@@ -58,6 +58,7 @@
     transform: scale(0.9);
     opacity: 0;
     transition: transform 0.2s, opacity 0.2s ease;
+    z-index: -10000 !important;
   }
 
   h1 {
