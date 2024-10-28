@@ -1,20 +1,19 @@
 .filter {
   position: relative;
   display: grid;
-  justify-content: start;
+  justify-content: end;
 
   margin-top: 1rem;
-  margin-left: 1.5rem;
+  margin-right: 1.5rem;
 
   .filter-btn {
     display: flex;
     gap: 1rem;
 
     font-family: monospace;
-    font-size: 1.25rem;
 
     background: none;
-    border: 1px solid var(--col-secondary);
+    border: none;
 
     color: var(--col-white);
   }
@@ -24,7 +23,7 @@
 
     position: absolute;
     top: 2rem;
-    left: 0;
+    right: -1rem;
 
     display: grid;
     grid-template-columns: 1fr 1fr;
