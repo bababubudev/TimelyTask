@@ -1,0 +1,55 @@
+.filter {
+  position: relative;
+  display: grid;
+  justify-content: start;
+
+  margin-top: 1rem;
+  margin-left: 1.5rem;
+
+  .filter-btn {
+    display: flex;
+    gap: 1rem;
+
+    font-family: monospace;
+    font-size: 1.25rem;
+
+    background: none;
+    border: 1px solid var(--col-secondary);
+
+    color: var(--col-white);
+  }
+
+  .filter-items {
+    z-index: 1000;
+
+    position: absolute;
+    top: 2rem;
+    left: 0;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    background: var(--col-secondary);
+
+    .filter-content {
+      display: grid;
+      grid-column: span 2;
+
+      label {
+        display: flex;
+        gap: 1rem;
+
+        padding: 0.5rem;
+      }
+    }
+
+    .filter-type-btn {
+      display: grid;
+
+      label {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}

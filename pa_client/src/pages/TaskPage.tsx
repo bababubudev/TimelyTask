@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Header from "../components/Header"
 import TaskCard from "../components/TaskCard";
 import Modal from "../components/Modal";
 import { mapIDsToNames } from "../utility/tagMapping";
-import { ModalType, type mappedTag, type tag, type task } from "../utility/types";
+import { FilterType, ModalType, type mappedTag, type tag, type task } from "../utility/types";
 import TaskForm from "../components/TaskForm";
 import { findDataWithID, isEqual, isNewData } from "../utility/utilityFunctions";
+import TagFilter from "../components/TagFilter";
 
 function Task() {
   const BASE_URL = "http://127.0.0.1:3010";
@@ -19,9 +20,10 @@ function Task() {
   const defError = "Something went wrong :/";
 
   const [tasks, setTasks] = useState<task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<task[]>([]);
   const [tagMap, setTagMap] = useState<mappedTag>({});
-  const [selectedTask, setSelectedTask] = useState<task>(emptyTask);
 
+  const [selectedTask, setSelectedTask] = useState<task>(emptyTask);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -228,6 +230,7 @@ function Task() {
     }
     else {
       const current = findDataWithID<task>(tasks, id);
+
       if (!current) {
         setError(new Error(defError));
         return;
@@ -243,13 +246,34 @@ function Task() {
     }
   };
 
+  const onFilterChange = useCallback((chosenTags: string[], type: FilterType) => {
+    const tagFilters: task[] = tasks.filter((task) => {
+      const tagArray = task.tags.split(",");
+      if (type === "AND") {
+        return chosenTags.length === 0 || chosenTags.every(tag => tagArray.includes(tag));
+      }
+      else {
+        return chosenTags.length === 0 || chosenTags.some(tag => tagArray.includes(tag));
+      }
+    });
+
+    setFilteredTasks(tagFilters);
+  }, [tasks]);
+
+
   return (
     <div className="page task-page">
       <Header />
-      <h1>Tasks</h1>
+      <div className="page-name">
+        <h1>Tasks</h1>
+        <TagFilter
+          tagMap={tagMap}
+          onFilterChange={onFilterChange}
+        />
+      </div>
       <div className="content task-content">
         <ul className="tasks-display">
-          {tasks.length > 0 && tasks.map(elem => (
+          {filteredTasks.length > 0 && filteredTasks.map(elem => (
             <TaskCard
               key={elem.id}
               currentTask={elem}

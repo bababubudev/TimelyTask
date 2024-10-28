@@ -57,13 +57,13 @@ form {
 
         color: var(--col-window-bg);
         background: none;
-        border: 2px solid var(--col-window-bg);
+        border: 1px solid var(--col-window-bg);
         border-radius: 0.25rem;
 
         padding: 0.75rem;
 
         &:focus {
-          border: 2px solid var(--col-secondary);
+          border: 1px solid var(--col-secondary);
         }
 
         &::placeholder {
@@ -94,10 +94,8 @@ form {
       .add-tag-btn {
         position: absolute;
         right: 0;
-        top: -0.5rem;
-        height: 3.25rem;
+        height: 3rem;
 
-        margin-top: .5rem;
         padding: 0.75rem;
         background: var(--col-secondary);
         color: var(--col-white);
@@ -135,6 +133,7 @@ form {
 
     background: var(--col-white-faded);
     backdrop-filter: blur(0.1rem);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
 
     svg {
       color: var(--col-window-bg);
@@ -222,12 +221,6 @@ form {
     overflow-x: scroll;
     scrollbar-gutter: stable;
 
-    p {
-      font-family: monospace;
-      align-self: center;
-      user-select: none;
-    }
-
     >button {
       font-size: 0.85rem;
       font-weight: bolder;
@@ -307,7 +300,7 @@ form {
   gap: 0.25rem 0.5rem;
 
   margin-top: 1rem;
-  border: 2px solid var(--col-window-bg);
+  border: 1px solid var(--col-window-bg);
   border-radius: 0.25rem;
   padding: 1rem;
 

@@ -1,5 +1,10 @@
 @use "../components/TaskCard.scss";
 @use "../components/TaskForm.scss";
+@use "../components/TagFilter.scss";
+
+.task-page {
+  display: grid;
+}
 
 .tasks-display {
   display: grid;

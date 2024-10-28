@@ -10,7 +10,9 @@ export enum ModalType {
   "form"
 }
 
-export type action = "GET" | "POST" | "PUT"
+export type action = "GET" | "POST" | "PUT";
+
+export type FilterType = "AND" | "OR";
 
 export type task = {
   id: number,

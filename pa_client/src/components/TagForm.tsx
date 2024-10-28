@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import Modal from "./Modal";
 import { mappedTag, ModalType } from "../utility/types";
 import { IoInformationCircle } from "react-icons/io5";
@@ -44,6 +44,22 @@ function TagForm({ createTagForm, tagMap, createTag, removeTagWithID, setCreateT
     }
   };
 
+  useEffect(() => {
+    const handleGlobalClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.classList.contains("modal-overlay")) {
+        if (createTagForm) setCreateTagForm(false);
+        if (removeTagAlert) setRemoveTagAlert(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleGlobalClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleGlobalClick);
+    };
+  }, [createTagForm, setCreateTagForm, removeTagAlert]);
+
   return (
     <Modal
       isDisabled={!validAddition}
@@ -73,7 +89,7 @@ function TagForm({ createTagForm, tagMap, createTag, removeTagWithID, setCreateT
               disabled={!validAddition}
               onClick={handleTagAddition}
             >
-              Add Tag
+              add tag
             </button>
           </div>
           <div className="all-tag-view">
@@ -95,7 +111,7 @@ function TagForm({ createTagForm, tagMap, createTag, removeTagWithID, setCreateT
             zIndex={40}
             type={ModalType.alert}
             dialogue="Delete tag?"
-            description={<p>Are you sure you want to delete <b>{tagMap[removalID]}</b>?</p>}
+            description={<p>Are you sure you want to delete <b>{tagMap[removalID]}</b> permanently?</p>}
             isOpen={removeTagAlert}
             onConfirm={() => {
               if (removeTagAlert) removeTagWithID(removalID);

@@ -47,12 +47,14 @@ img {
   object-fit: cover;
 }
 
-.page>h1 {
-  opacity: 0.6;
-  letter-spacing: 0.5rem;
+.page .page-name {
+  h1 {
+    opacity: 0.6;
+    letter-spacing: 0.5rem;
 
-  border-top: 1px solid var(--col-white-faded);
-  border-bottom: 1px solid var(--col-white-faded);
-  padding-block: 0.25rem;
-  padding-left: 2rem;
+    border-top: 1px solid var(--col-white-faded);
+    border-bottom: 1px solid var(--col-white-faded);
+    padding-block: 0.25rem;
+    padding-left: 2rem;
+  }
 }

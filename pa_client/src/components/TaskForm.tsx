@@ -22,7 +22,8 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
 
   const [tagInput, setTagInput] = useState<string>("");
   const [createTagForm, setCreateTagForm] = useState<boolean>(false);
-  const [removeTagAlert, setRemoveAlert] = useState<boolean>(false);
+
+  const hasTags = selectedTask.tags.length > 0;
 
   const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -87,22 +88,6 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
   };
 
   useEffect(() => {
-    const handleGlobalClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (target.classList.contains("modal-overlay")) {
-        if (createTagForm) setCreateTagForm(false);
-        if (removeTagAlert) setRemoveAlert(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleGlobalClick);
-
-    return () => {
-      document.removeEventListener("mousedown", handleGlobalClick);
-    };
-  }, [createTagForm, removeTagAlert]);
-
-  useEffect(() => {
     scrollRight(1920);
   }, []);
 
@@ -156,12 +141,10 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
         <button type="button" className="scroll-btn left" onClick={scrollLeft}>
           <FaAngleLeft />
         </button>
-        {selectedTask.tags.length > 0 &&
-          <div className="selected-tags-info">
-            <IoInformationCircle />
-            <p>click on a tag to remove</p>
-          </div>
-        }
+        <div className="selected-tags-info">
+          <IoInformationCircle />
+          <p>{hasTags ? "click on a tag to remove" : "tags for the task show up here"}</p>
+        </div>
         <div className="selected-tags" ref={selectedTagsRef}>
           {mapIDsToNames(selectedTask.tags, tagMap).map((tag, index) => (
             <button
@@ -172,7 +155,6 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
               {tag}
             </button>
           ))}
-          {selectedTask.tags.length === 0 && <p>chosen tasks show up here</p>}
         </div>
         <button type="button" className="scroll-btn right" onClick={() => scrollRight()}>
           <FaAngleLeft />
@@ -195,7 +177,6 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
           <AiFillDelete />
         </button>
       }
-      {/* Modal for modifying tags*/}
       <TagForm
         createTagForm={createTagForm}
         tagMap={tagMap}
