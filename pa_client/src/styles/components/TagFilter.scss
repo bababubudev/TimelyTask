@@ -9,6 +9,7 @@
   .filter-btn {
     display: flex;
     gap: 1rem;
+    min-width: 7rem;
 
     font-family: monospace;
 
@@ -23,31 +24,192 @@
 
     position: absolute;
     top: 2rem;
-    right: -1rem;
+    right: -0.5rem;
+    min-width: 20rem;
+    max-height: 25rem;
+
+    padding: 0.5rem;
+    margin-left: 1rem;
+
+    border-radius: 0.25rem;
+    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.6);
 
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 7rem;
+    gap: 1rem;
 
     background: var(--col-secondary);
 
     .filter-content {
       display: grid;
       grid-column: span 2;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--col-window-bg);
+
+      padding-top: 3rem;
 
       label {
         display: flex;
+        align-items: center;
+        user-select: none;
         gap: 1rem;
 
         padding: 0.5rem;
+        cursor: pointer;
+
+        input[type="checkbox"] {
+          -webkit-appearance: none;
+          appearance: none;
+          display: grid;
+          place-items: center;
+
+
+          width: 1.15rem;
+          height: 1.15rem;
+
+          border-radius: 10ch;
+          border: 1px dashed var(--col-window-bg);
+          background-color: var(--col-white);
+          box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+
+          outline: none;
+          padding-bottom: 0.25ch;
+
+          &::before {
+            content: "";
+            display: block;
+
+            width: 1.1rem;
+            height: 0.5rem;
+
+            transform: scale(0, 0);
+            transition: 200ms transform ease-in-out;
+            box-shadow: inset 0.5ch 0.5ch var(--col-accent);
+          }
+
+          &:checked::before {
+            transform: scale(1, -1) rotate(45deg);
+          }
+
+          &:checked {
+            border: 1px solid var(--col-window-bg);
+          }
+        }
       }
     }
 
     .filter-type-btn {
       display: grid;
+      padding-left: 0.5rem;
+      gap: .5rem;
 
       label {
         display: flex;
         align-items: center;
+        gap: 1rem;
+
+        input[type="radio"] {
+          -webkit-appearance: none;
+          appearance: none;
+          display: grid;
+          place-items: center;
+
+          width: 1rem;
+          height: 1rem;
+
+          border: none;
+          border-radius: 100%;
+          background-color: var(--col-white-faded);
+          box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+
+          outline: none;
+          padding-bottom: 0.25ch;
+
+          &::before {
+            content: "";
+            display: block;
+
+            width: 1rem;
+            height: 1rem;
+
+            border: none;
+            background-color: var(--col-accent);
+            border-radius: 100%;
+            transform: scale(0);
+            transition: 300ms transform cubic-bezier(0.23, 1, 0.320, 1);
+          }
+
+          &:checked::before {
+            transform: scale(1, -1) rotate(45deg);
+          }
+        }
+      }
+    }
+
+    .clear-filter-btn {
+      align-self: end;
+
+      display: grid;
+      justify-items: center;
+      align-items: center;
+      align-content: center;
+
+      background: var(--col-window-bg-faded);
+      color: var(--col-white);
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.5rem;
+      margin-right: 0.5rem;
+
+      svg {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      p {
+        font-family: monospace;
+        opacity: 0.6;
+        font-size: 0.9rem;
+      }
+
+      &:active {
+        color: var(--col-window-bg);
+        background: var(--col-white-faded);
+      }
+    }
+  }
+
+  .filter-items {
+    transform-origin: 90% top;
+    transition: transform 0.15s ease, opacity 0.2s ease;
+
+    &.shown {
+      transform: scale(1);
+      opacity: 1;
+
+      transition-delay: 0s;
+
+      * {
+        transition: opacity 0.1s;
+
+        opacity: 1;
+        transition-delay: 0.15s;
+      }
+    }
+
+    &.hidden {
+      transform: scale(0);
+      opacity: 0;
+
+      transition-delay: 0.1s;
+
+      * {
+        transition: opacity 0.1s ease;
+
+        opacity: 0;
+        transition-delay: 0s;
       }
     }
   }

@@ -2,15 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import Header from "../components/Header"
 import TaskCard from "../components/TaskCard";
 import Modal from "../components/Modal";
-import { mapIDsToNames } from "../utility/tagMapping";
-import { FilterType, ModalType, type mappedTag, type tag, type task } from "../utility/types";
 import TaskForm from "../components/TaskForm";
-import { findDataWithID, isEqual, isNewData } from "../utility/utilityFunctions";
 import TagFilter from "../components/TagFilter";
+import { mapIDsToNames } from "../utility/tagMapping";
+import { findDataWithID, isEqual, isNewData, BASE_URL } from "../utility/utilityComponent";
+import { FilterType, ModalType, type mappedTag, type tag, type task } from "../utility/types";
 
 function Task() {
-  const BASE_URL = "http://127.0.0.1:3010";
-
   const emptyTask: task = {
     id: -1,
     name: "Add new task",
@@ -249,7 +247,7 @@ function Task() {
   const onFilterChange = useCallback((chosenTags: string[], type: FilterType) => {
     const tagFilters: task[] = tasks.filter((task) => {
       const tagArray = task.tags.split(",");
-      if (type === "AND") {
+      if (type === FilterType.AND) {
         return chosenTags.length === 0 || chosenTags.every(tag => tagArray.includes(tag));
       }
       else {
@@ -264,7 +262,7 @@ function Task() {
   return (
     <div className="page task-page">
       <Header />
-      <div className="page-name">
+      <div className="page-header">
         <h1>Tasks</h1>
         <TagFilter
           tagMap={tagMap}
@@ -315,7 +313,7 @@ function Task() {
           type={ModalType.alert}
           dialogue="Delete task?"
           isOpen={isAlertOpen}
-          description={`Are you sure you want to delete task ${selectedTask.name}?`}
+          description={<p>Are you sure you want to delete task <b>{selectedTask.name}</b>?</p>}
           onConfirm={() => deleteTask(selectedTask.id)}
           onCancel={() => setIsAlertOpen(false)}
           zIndex={20}

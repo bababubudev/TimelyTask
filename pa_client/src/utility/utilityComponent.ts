@@ -1,3 +1,5 @@
+export const BASE_URL = "http://127.0.0.1:3010";
+
 export function findDataWithID<T extends { id: number }>(data: T[], id: number): T | undefined {
   return data.find(elem => elem.id === id);
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { FaFilter, FaFilterCircleXmark } from "react-icons/fa6";
 import { FilterType, mappedTag } from "../utility/types";
-import { FaFilter } from "react-icons/fa6";
 
 interface TagFilterProp {
   tagMap: mappedTag;
@@ -9,7 +9,7 @@ interface TagFilterProp {
 
 function TagFilter({ tagMap, onFilterChange }: TagFilterProp) {
   const [tagFilters, setTagFilters] = useState<string[]>([]);
-  const [filterType, setFilterType] = useState<FilterType>("AND");
+  const [filterType, setFilterType] = useState<FilterType>(FilterType.AND);
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
 
   const filterRef = useRef<HTMLDivElement>(null);
@@ -26,7 +26,7 @@ function TagFilter({ tagMap, onFilterChange }: TagFilterProp) {
     });
   };
 
-  const handleFilterTypeChange = (type: "AND" | "OR") => {
+  const handleFilterTypeChange = (type: FilterType) => {
     setFilterType(type);
   };
 
@@ -62,57 +62,52 @@ function TagFilter({ tagMap, onFilterChange }: TagFilterProp) {
           </span>
         )}
       </button>
-      {
-        isFilterOpen && (
-          <>
-            <div className="filter-items">
-              <button
-                className="clear-filter-btn"
-                onClick={() => setTagFilters([])}
-              >
-                clear
-              </button>
-              <div className="filter-type-btn">
+      <div className={`filter-items ${isFilterOpen ? "shown" : "hidden"}`}>
+        <div className="filter-type-btn">
+          Match filter
+          <label htmlFor="and-type">
+            <input
+              className="filter-all-btn"
+              type="radio"
+              id="and-type"
+              checked={filterType === FilterType.AND}
+              onChange={() => handleFilterTypeChange(FilterType.AND)}
+            />
+            <span>All</span>
+          </label>
 
-                <label htmlFor="and-type">
-                  <input
-                    className="filter-all-btn"
-                    type="radio"
-                    id="and-type"
-                    checked={filterType === "AND"}
-                    onClick={() => handleFilterTypeChange("AND")}
-                  />
-                  <span>Match All</span>
-                </label>
+          <label htmlFor="or-type">
+            <input
+              className="filter-all-btn"
+              type="radio"
+              id="or-type"
+              checked={filterType === FilterType.OR}
+              onChange={() => handleFilterTypeChange(FilterType.OR)}
+            />
+            <span>Any</span>
+          </label>
+        </div>
 
-                <label htmlFor="or-type">
-                  <input
-                    className="filter-all-btn"
-                    type="radio"
-                    id="or-type"
-                    checked={filterType === "OR"}
-                    onClick={() => handleFilterTypeChange("OR")}
-                  />
-                  <span>Match Any</span>
-                </label>
-              </div>
-
-              <div className="filter-content">
-                {Object.entries(tagMap).map(([id, name]) => (
-                  <label key={id}>
-                    <input
-                      type="checkbox"
-                      checked={tagFilters.includes(id)}
-                      onChange={() => handleTagChange(id)}
-                    />
-                    <span>{name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </>
-        )
-      }
+        <button
+          className="clear-filter-btn"
+          onClick={() => setTagFilters([])}
+        >
+          <FaFilterCircleXmark />
+          <p>clear</p>
+        </button>
+        <div className="filter-content">
+          {Object.entries(tagMap).map(([id, name]) => (
+            <label key={id}>
+              <input
+                type="checkbox"
+                checked={tagFilters.includes(id)}
+                onChange={() => handleTagChange(id)}
+              />
+              <span>{name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
     </div >
   );
 }

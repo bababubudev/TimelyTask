@@ -1,15 +1,24 @@
 import { useState } from "react";
 import Header from "../components/Header"
 import Modal from "../components/Modal";
-import { ModalType } from "../utility/types";
+import { ModalType, ThemeType } from "../utility/types";
+import { useOptions } from "../context/OptionsContext";
 
 function Option() {
+  const { options, setOptions } = useOptions();
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
+
+  const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const theme = e.target.value as ThemeType;
+    setOptions({ theme: theme });
+  };
 
   return (
     <div className="page option-page">
       <Header />
-      <h1>Options</h1>
+      <div className="page-header">
+        <h1>Options</h1>
+      </div>
       <div className="content option-content">
         <button onClick={() => setIsAboutOpen(prev => !prev)}>Information</button>
         <Modal
@@ -36,6 +45,14 @@ function Option() {
           onConfirm={() => setIsAboutOpen(false)}
           onCancel={() => setIsAboutOpen(false)}
         />
+        <div>
+          <p>Current Theme: {options?.theme ?? ThemeType.default}</p>
+          <select value={options?.theme} onChange={handleThemeChange}>
+            <option value={ThemeType.default}>Default</option>
+            <option value={ThemeType.light}>Light</option>
+            <option value={ThemeType.dark}>Dark</option>
+          </select>
+        </div>
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
-export enum theme {
-  "light",
-  "dark",
-  "default"
+export enum ThemeType {
+  light = "light",
+  dark = "dark",
+  default = "default"
 }
 
 export enum ModalType {
@@ -10,9 +10,10 @@ export enum ModalType {
   "form"
 }
 
-export type action = "GET" | "POST" | "PUT";
-
-export type FilterType = "AND" | "OR";
+export enum FilterType {
+  "AND",
+  "OR"
+}
 
 export type task = {
   id: number,
@@ -36,7 +37,7 @@ export type timestamp = {
 
 export type options = {
   id: number,
-  theme: theme,
+  theme: ThemeType,
   alternative: number,
   own_textual_data: string,
 };
