@@ -54,17 +54,16 @@ function TagFilter({ tagMap, onFilterChange }: TagFilterProp) {
       ref={filterRef}
     >
       <button className="filter-btn" onClick={toggleFilter}>
-        <FaFilter />
-        <span> Filter</span>
-        {tagFilters.length > 0 && (
-          <span>
+        <div>
+          <FaFilter />
+          <span className={`amount ${tagFilters.length > 0 ? "non-zero" : ""}`}>
             {tagFilters.length}
           </span>
-        )}
+        </div>
+        <span>filter</span>
       </button>
       <div className={`filter-items ${isFilterOpen ? "shown" : "hidden"}`}>
         <div className="filter-type-btn">
-          Match filter
           <label htmlFor="and-type">
             <input
               className="filter-all-btn"
@@ -73,7 +72,7 @@ function TagFilter({ tagMap, onFilterChange }: TagFilterProp) {
               checked={filterType === FilterType.AND}
               onChange={() => handleFilterTypeChange(FilterType.AND)}
             />
-            <span>All</span>
+            <span>All chosen</span>
           </label>
 
           <label htmlFor="or-type">
@@ -84,7 +83,7 @@ function TagFilter({ tagMap, onFilterChange }: TagFilterProp) {
               checked={filterType === FilterType.OR}
               onChange={() => handleFilterTypeChange(FilterType.OR)}
             />
-            <span>Any</span>
+            <span>Any chosen</span>
           </label>
         </div>
 
