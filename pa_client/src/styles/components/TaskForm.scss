@@ -35,9 +35,11 @@ form {
         color: var(--col-window-bg);
       }
 
-      &:focus-within input {
-        &::placeholder {
-          color: var(--col-window-bg-faded);
+      &:focus-within {
+        input {
+          &::placeholder {
+            color: var(--col-window-bg-faded);
+          }
         }
       }
     }
@@ -46,6 +48,12 @@ form {
     .tag-area {
       display: grid;
       position: relative;
+
+      &:focus-within {
+        label {
+          color: var(--col-secondary);
+        }
+      }
 
       label {
         pointer-events: none;
@@ -235,9 +243,11 @@ form {
       white-space: nowrap;
       cursor: pointer;
 
-      &:hover {
-        text-decoration: line-through;
-        background-color: var(--col-accent);
+      @media screen and (min-width: 650px) {
+        &:hover {
+          text-decoration: line-through;
+          background-color: var(--col-accent);
+        }
       }
 
       &:active {

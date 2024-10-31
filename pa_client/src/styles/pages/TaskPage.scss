@@ -13,6 +13,20 @@
 
   gap: 1rem;
   padding: 1rem;
+
+  .is-empty-filter {
+    display: flex;
+    justify-content: center;
+
+    font-weight: bolder;
+    background: var(--col-accent);
+    color: var(--col-window-bg);
+    border-radius: 0.5rem;
+  }
+
+  .task-card {
+    cursor: pointer;
+  }
 }
 
 @media screen and (min-width: 1300px) {

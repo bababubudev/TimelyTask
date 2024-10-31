@@ -6,13 +6,17 @@ import TaskForm from "../components/TaskForm";
 import TagFilter from "../components/TagFilter";
 import { mapIDsToNames } from "../utility/tagMapping";
 import { findDataWithID, isEqual, isNewData, BASE_URL } from "../utility/utilityComponent";
-import { FilterType, ModalType, type mappedTag, type tag, type task } from "../utility/types";
+import { FilterType, ModalType } from "../utility/types";
+import { closestCorners, DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { arrayMove, SortableContext } from "@dnd-kit/sortable";
+
+import type { task, tag, mappedTag } from "../utility/types";
 
 function Task() {
   const emptyTask: task = {
     id: -1,
     name: "Add new task",
-    tags: ""
+    tags: "",
   };
 
   const defError = "Something went wrong :/";
@@ -21,6 +25,7 @@ function Task() {
   const [filteredTasks, setFilteredTasks] = useState<task[]>([]);
   const [tagMap, setTagMap] = useState<mappedTag>({});
 
+  const [activeTask, setActiveTask] = useState<task | undefined>(undefined);
   const [selectedTask, setSelectedTask] = useState<task>(emptyTask);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -75,6 +80,7 @@ function Task() {
 
   useEffect(() => {
     fetchAllData();
+    console.log("Fetching");
   }, []);
 
   const addTask = async (content: task) => {
@@ -138,7 +144,8 @@ function Task() {
       setLoading(true);
       await fetch(`${BASE_URL}/tasks/${id}`, { method: "DELETE" });
 
-      setTasks((prev) => prev.filter((task) => task.id !== id));
+      const updated = tasks.filter(task => task.id !== id);
+      setTasks(updated);
     }
     catch (err) {
       console.log("[ Deleting task failed ]\n", err);
@@ -201,6 +208,7 @@ function Task() {
   }
 
   const onCardClicked = (id: number) => {
+    console.log("wat");
     setIsEditorOpen(true);
     if (id < -1) {
       setError(new Error(defError))
@@ -258,6 +266,40 @@ function Task() {
     setFilteredTasks(tagFilters);
   }, [tasks]);
 
+  const handleDragStart = (event: DragStartEvent): void => {
+    const { active } = event;
+    setActiveTask(tasks.find(task => task.id === active.id));
+  };
+
+  const handleDragEnd = (event: DragEndEvent): void => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const activeItem = tasks.find(elem => elem.id === active.id);
+    const overItem = tasks.find(elem => elem.id === over.id);
+
+    if (!activeItem || !overItem) {
+      return;
+    }
+
+    const activeIndex = tasks.findIndex(task => task.id === active.id);
+    const overIndex = tasks.findIndex(task => task.id === over.id);
+
+    if (activeIndex !== overIndex) {
+      setTasks(prev => {
+        const updated = arrayMove(prev, activeIndex, overIndex)
+        return updated;
+      });
+    }
+    setActiveTask(undefined);
+  };
+
+  const handleDragCancel = () => {
+    setActiveTask(undefined);
+  };
+
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   return (
     <div className="page task-page">
@@ -270,22 +312,51 @@ function Task() {
         />
       </div>
       <div className="content task-content">
-        <ul className="tasks-display">
-          {filteredTasks.length > 0 && filteredTasks.map(elem => (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <ul className="tasks-display">
+            {filteredTasks.length > 0 ?
+              <SortableContext
+                items={tasks}
+              >
+                {filteredTasks.map((elem, i) => (
+                  <TaskCard
+                    key={i}
+                    taskId={elem.id}
+                    taskTitle={elem.name}
+                    taskTags={mapIDsToNames(elem.tags, tagMap)}
+                    onCardClicked={(id) => onCardClicked(id)}
+                  />
+                ))}
+              </SortableContext> :
+              <div className="is-empty-filter">
+                <p>Your chosen filter returned no results</p>
+              </div>
+            }
             <TaskCard
-              key={elem.id}
-              currentTask={elem}
-              taskTags={mapIDsToNames(elem.tags, tagMap)}
-              onCardClicked={(id) => onCardClicked(id)}
+              isAdderTag={true}
+              taskId={emptyTask.id}
+              taskTitle={emptyTask.name}
+              taskTags={[""]}
+              onCardClicked={onCardClicked}
             />
-          ))}
-          <TaskCard
-            isAdderTag={true}
-            currentTask={emptyTask}
-            taskTags={[""]}
-            onCardClicked={onCardClicked}
-          />
-        </ul>
+          </ul>
+          <DragOverlay adjustScale style={{ transformOrigin: "0 0 " }}>
+            {activeTask ? (
+              <TaskCard
+                taskId={activeTask.id}
+                taskTitle={activeTask.name}
+                taskTags={mapIDsToNames(activeTask.tags, tagMap)}
+                onCardClicked={() => { }}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
         {selectedTask.id > -2 &&
           <Modal
             isDisabled={isEditTaskDisabled}

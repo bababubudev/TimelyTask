@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { mappedTag, task } from "../utility/types";
 import { mapIDsToNames, mapNamesToIds } from "../utility/tagMapping";
 import { FaAngleLeft } from "react-icons/fa";
@@ -33,7 +33,7 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
     if (validTag) handleTagSelect(input);
   };
 
-  const handleTagSelect = (tagName: string) => {
+  const handleTagSelect = useCallback((tagName: string) => {
     const tagId = mapNamesToIds([tagName], tagMap);
 
     //* inserts unique tags only
@@ -43,7 +43,7 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
     }
 
     setTagInput("");
-  };
+  }, [selectedTask, setSelectedTask, tagMap]);
 
   const handleTagRemove = (tagName: string) => {
     const tagId = mapNamesToIds([tagName], tagMap);
@@ -61,7 +61,7 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (createTagForm || isDisabled) {
+      if (createTagForm || tagInput !== "" || isDisabled) {
         return;
       }
 
@@ -89,7 +89,7 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
 
   useEffect(() => {
     scrollRight(1920);
-  }, []);
+  }, [handleTagSelect]);
 
   return (
     <>
@@ -124,7 +124,7 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
           type="text"
           id="task-tags"
           autoComplete="off"
-          placeholder="Choose a tag"
+          placeholder="Choose a tag to add"
           list="suggestions"
           value={tagInput}
           onChange={handleTagChange}

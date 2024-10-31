@@ -9,6 +9,7 @@
 
   min-height: 10rem;
   transition: transform 0.1s ease-in-out;
+  user-select: none;
 
   &.adder-tag {
     opacity: 0.3;
@@ -105,4 +106,12 @@
     color: var(--col-white-faded);
     font-size: $currentSize;
   }
+}
+
+.drag-handle {
+  padding: 5px;
+  background-color: #ccc;
+  border-radius: 3px;
+  margin-top: 10px;
+  text-align: center;
 }

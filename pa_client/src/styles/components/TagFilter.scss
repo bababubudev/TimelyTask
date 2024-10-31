@@ -119,11 +119,13 @@
           }
         }
 
-        &:hover {
-          input {
-            border: 1px solid var(--col-window-bg);
-            background: var(--col-white);
-            transform: scale(1.2);
+        @media screen and (min-width: 650px) {
+          &:hover {
+            input {
+              border: 1px solid var(--col-window-bg);
+              background: var(--col-white);
+              transform: scale(1.2);
+            }
           }
         }
       }
