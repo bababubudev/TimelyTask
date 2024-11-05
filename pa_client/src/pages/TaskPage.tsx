@@ -17,6 +17,7 @@ function Task() {
     id: -1,
     name: "Add new task",
     tags: "",
+    position: -1,
   };
 
   const defError = "Something went wrong :/";
@@ -35,6 +36,8 @@ function Task() {
 
   const isEditTaskDisabled = selectedTask.name === "" ||
     (selectedTask.id > -1 && !isNewData<task>(tasks, selectedTask));
+
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
@@ -66,7 +69,7 @@ function Task() {
       const tagMap: mappedTag = {};
       tagsJson.forEach(elem => { tagMap[elem.id] = elem.name });
 
-      setTasks(tasksJson);
+      setTasks(tasksJson.map((task, i) => ({ ...task, position: i + 1 })));
       setTagMap(tagMap);
     }
     catch (err) {
@@ -80,7 +83,6 @@ function Task() {
 
   useEffect(() => {
     fetchAllData();
-    console.log("Fetching");
   }, []);
 
   const addTask = async (content: task) => {
@@ -97,7 +99,7 @@ function Task() {
       });
 
       const { id } = await postResponse.json();
-      setTasks((prev) => [...prev, { id, name, tags }]);
+      setTasks((prev) => [...prev, { id, name, tags, position: prev.length + 1 }]);
       console.log("adding task", { id, name, tags });
     }
     catch (err) {
@@ -144,7 +146,10 @@ function Task() {
       setLoading(true);
       await fetch(`${BASE_URL}/tasks/${id}`, { method: "DELETE" });
 
-      const updated = tasks.filter(task => task.id !== id);
+      const updated = tasks
+        .filter(task => task.id !== id)
+        .map((task, i) => ({ ...task, position: i + 1 }));
+
       setTasks(updated);
     }
     catch (err) {
@@ -178,8 +183,8 @@ function Task() {
       setTagMap(prev => ({ ...prev, [id]: tagName }));
     }
     catch (err) {
-      setError(new Error("Adding task failed"));
-      console.log("[ Adding task failed ]\n", err);
+      setError(new Error("Adding tag failed"));
+      console.log("[ Adding tag failed ]\n", err);
     }
     finally {
       setLoading(false);
@@ -199,8 +204,8 @@ function Task() {
       });
     }
     catch (err) {
-      console.log("[ Deleting task failed ]\n", err);
-      setError(new Error("Deleting task failed"));
+      console.log("[ Deleting tag failed ]\n", err);
+      setError(new Error("Deleting tag failed"));
     }
     finally {
       setLoading(false);
@@ -268,7 +273,7 @@ function Task() {
 
   const handleDragStart = (event: DragStartEvent): void => {
     const { active } = event;
-    setActiveTask(tasks.find(task => task.id === active.id));
+    setActiveTask(tasks.find(task => task.position === active.id));
   };
 
   const handleDragEnd = (event: DragEndEvent): void => {
@@ -276,30 +281,26 @@ function Task() {
 
     if (!over) return;
 
-    const activeItem = tasks.find(elem => elem.id === active.id);
-    const overItem = tasks.find(elem => elem.id === over.id);
+    const activeItem = tasks.find(elem => elem.position === active.id);
+    const overItem = tasks.find(elem => elem.position === over.id);
 
     if (!activeItem || !overItem) {
       return;
     }
 
-    const activeIndex = tasks.findIndex(task => task.id === active.id);
-    const overIndex = tasks.findIndex(task => task.id === over.id);
+    const activeIndex = tasks.findIndex(task => task.position === active.id);
+    const overIndex = tasks.findIndex(task => task.position === over.id);
 
     if (activeIndex !== overIndex) {
       setTasks(prev => {
-        const updated = arrayMove(prev, activeIndex, overIndex)
+        const updated = arrayMove(prev, activeIndex, overIndex).map((task, i) => ({ ...task, position: i + 1 }));
         return updated;
       });
     }
     setActiveTask(undefined);
   };
 
-  const handleDragCancel = () => {
-    setActiveTask(undefined);
-  };
-
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+  const handleDragCancel = () => setActiveTask(undefined);
 
   return (
     <div className="page task-page">
@@ -320,22 +321,23 @@ function Task() {
           onDragCancel={handleDragCancel}
         >
           <ul className="tasks-display">
-            {filteredTasks.length > 0 ?
+            {filteredTasks.length > 0 || tasks.length > 0 ?
               <SortableContext
-                items={tasks}
+                items={tasks.map(task => task.position)}
               >
                 {filteredTasks.map((elem, i) => (
                   <TaskCard
                     key={i}
                     taskId={elem.id}
                     taskTitle={elem.name}
+                    taskPosition={elem.position}
                     taskTags={mapIDsToNames(elem.tags, tagMap)}
                     onCardClicked={(id) => onCardClicked(id)}
                   />
                 ))}
               </SortableContext> :
               <div className="is-empty-filter">
-                <p>Your chosen filter returned no results</p>
+                <p>No tasks found</p>
               </div>
             }
             <TaskCard
@@ -343,6 +345,7 @@ function Task() {
               taskId={emptyTask.id}
               taskTitle={emptyTask.name}
               taskTags={[""]}
+              taskPosition={emptyTask.position}
               onCardClicked={onCardClicked}
             />
           </ul>
@@ -352,6 +355,7 @@ function Task() {
                 taskId={activeTask.id}
                 taskTitle={activeTask.name}
                 taskTags={mapIDsToNames(activeTask.tags, tagMap)}
+                taskPosition={activeTask.position}
                 onCardClicked={() => { }}
               />
             ) : null}

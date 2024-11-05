@@ -17,11 +17,14 @@
   .is-empty-filter {
     display: flex;
     justify-content: center;
+    align-items: center;
 
+    font-size: 1.5rem;
     font-weight: bolder;
     background: var(--col-accent);
     color: var(--col-window-bg);
     border-radius: 0.5rem;
+    user-select: none;
   }
 
   .task-card {

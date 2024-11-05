@@ -1,16 +1,18 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { MdDragIndicator } from "react-icons/md";
 
 interface TaskCardProps {
   isAdderTag?: boolean;
   isOverlay?: boolean;
   taskId: number;
   taskTitle: string;
+  taskPosition: number;
   taskTags: string[];
   onCardClicked: (id: number) => void;
 }
 
-function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, taskTags, onCardClicked }: TaskCardProps) {
+function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, taskPosition, taskTags, onCardClicked }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -19,7 +21,7 @@ function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, ta
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: taskId });
+  } = useSortable({ id: taskPosition });
 
   const style = {
     transition: isAdderTag ? undefined : transition,
@@ -41,7 +43,12 @@ function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, ta
       <h2 className="task-name">{taskTitle}</h2>
       <div className="tag-list">
         {taskTags && taskTags.map((elem, i) => (
-          <span key={i} className={`tag-name ${elem === "important" ? "imp" : ""}`}>{elem}</span>
+          <span
+            key={i}
+            className={`tag-name ${elem === "important" ? "imp" : ""}`}
+          >
+            {elem}
+          </span>
         ))}
       </div>
       {isAdderTag &&
@@ -57,8 +64,7 @@ function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, ta
           {...attributes}
           style={draggableStyles}
         >
-          <span>Drag</span>
-          {taskId}
+          <MdDragIndicator />
         </div>
       }
     </div>
