@@ -215,7 +215,6 @@ function Task() {
   };
 
   const onCardClicked = (id: number) => {
-    console.log("wat");
     setIsEditorOpen(true);
     if (id < -1) {
       setError(new Error(defError))

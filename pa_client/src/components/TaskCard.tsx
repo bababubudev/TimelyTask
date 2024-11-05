@@ -45,6 +45,10 @@ function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, ta
       style={style}
     >
       <h2 className="task-name">{taskTitle}</h2>
+      <div className={`status-container`}>
+        <span>status</span>
+        <span>•</span>
+      </div>
       <div className="tag-list">
         {taskTags && taskTags.length > 0 ?
           taskTags.map((elem, i) => (
