@@ -130,7 +130,7 @@ function Task() {
       const tagMap: mappedTag = {};
       tagsJson.forEach(elem => { tagMap[elem.id] = elem.name });
 
-      setTasks(tasksJson.map((task, i) => ({ ...task, position: i + 1 })));
+      setTasks(tasksJson);
       setTagMap(tagMap);
     }
     catch (err) {
@@ -207,10 +207,7 @@ function Task() {
       setLoading(true);
       await fetch(`${BASE_URL}/tasks/${id}`, { method: "DELETE" });
 
-      const updated = tasks
-        .filter(task => task.id !== id)
-        .map((task, i) => ({ ...task, position: i + 1 }));
-
+      const updated = tasks.filter(task => task.id !== id)
       setTasks(updated);
     }
     catch (err) {
