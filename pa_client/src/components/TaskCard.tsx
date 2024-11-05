@@ -6,13 +6,24 @@ import { isFirefox } from "../utility/utilityComponent";
 interface TaskCardProps {
   isAdderTag?: boolean;
   isOverlay?: boolean;
+  isTaskActive?: boolean;
   taskId: number;
   taskTitle: string;
   taskTags: string[];
   onCardClicked: (id: number) => void;
+  toggleTaskActiveState: (id: number) => void;
 }
 
-function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, taskTags, onCardClicked }: TaskCardProps) {
+function TaskCard({
+  isOverlay = false,
+  isAdderTag = false,
+  isTaskActive = false,
+  taskId,
+  taskTitle,
+  taskTags,
+  onCardClicked,
+  toggleTaskActiveState,
+}: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -45,10 +56,15 @@ function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, ta
       style={style}
     >
       <h2 className="task-name">{taskTitle}</h2>
-      <div className={`status-container`}>
-        <span>status</span>
-        <span>•</span>
-      </div>
+      {!isAdderTag &&
+        <button
+          onClick={(e) => { e.stopPropagation(); toggleTaskActiveState(taskId); }}
+          className={`status-container ${isTaskActive ? "is-active" : ""}`}
+        >
+          <span>{isTaskActive ? "Active" : "Inactive"}</span>
+          <span>•</span>
+        </button>
+      }
       <div className="tag-list">
         {taskTags && taskTags.length > 0 ?
           taskTags.map((elem, i) => (

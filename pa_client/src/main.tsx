@@ -4,12 +4,12 @@ import { RouterProvider } from "react-router-dom"
 
 import { router } from "./utility/routingUtil.tsx"
 import "./styles/index.scss"
-import OptionsProvider from "./context/OptionsProvider.tsx"
+import DataProvider from "./context/DataProvider.tsx"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <OptionsProvider>
+    <DataProvider>
       <RouterProvider router={router} />
-    </OptionsProvider>
+    </DataProvider>
   </StrictMode>,
 )

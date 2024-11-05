@@ -100,12 +100,21 @@
 
 .status-container {
   justify-self: center;
+
+  display: flex;
+  gap: 1rem;
+
   font-size: 1rem;
   border-radius: 1rem;
 
-  padding: 0 1rem;
+  padding: 0.1rem 1rem;
+  border: none;
   background: var(--col-window-bg);
   color: var(--col-white);
+
+  &.is-active span {
+    color: var(--col-primary);
+  }
 }
 
 .adder-tag {

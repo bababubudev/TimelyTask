@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, matchPath, useLocation } from "react-router-dom";
 import { routes } from "../utility/routingUtil";
 
 function HeaderRoutes() {
@@ -7,7 +7,7 @@ function HeaderRoutes() {
   return (
     <ul className="header-list">
       {routes.map((route, i) => {
-        const isCurrent = location.pathname === route.path;
+        const isCurrent = matchPath(route.path, location.pathname);
 
         return (
           <li

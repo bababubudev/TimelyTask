@@ -2,7 +2,7 @@ import { useState } from "react";
 import Header from "../components/Header"
 import Modal from "../components/Modal";
 import { ModalType, ThemeType } from "../utility/types";
-import { useOptions } from "../context/OptionsContext";
+import { useData } from "../context/DataContext";
 import TagForm from "../components/TagForm";
 
 function Option() {
@@ -14,7 +14,8 @@ function Option() {
     setTagDeletion,
     optionLoading,
     optionError
-  } = useOptions();
+  } = useData();
+
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
   const [isTagFormOpen, setIsTagFormOpen] = useState<boolean>(false);
 

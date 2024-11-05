@@ -5,7 +5,7 @@ import Option from "../pages/OptionsPage";
 
 export const routes = [
   { path: "/", label: "Home" },
-  { path: "/task", label: "Tasks" },
+  { path: "/task", label: "Task" },
   { path: "/option", label: "Options" }
 ];
 
@@ -16,6 +16,10 @@ export const router = createBrowserRouter([
   },
   {
     path: "/task",
+    element: <Task />,
+  },
+  {
+    path: "/task/:id",
     element: <Task />,
   },
   {

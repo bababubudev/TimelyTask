@@ -35,6 +35,9 @@ export type timestamp = {
   type: number,
 };
 
+export type timestampMap = { [key: string]: timestamp[] };
+export type taskActivityMap = { [key: string]: boolean };
+
 export type options = {
   id: number,
   theme: ThemeType,

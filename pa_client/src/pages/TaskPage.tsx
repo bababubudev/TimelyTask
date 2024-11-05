@@ -1,370 +1,87 @@
-import { useCallback, useEffect, useState } from "react";
-import Header from "../components/Header"
-import TaskCard from "../components/TaskCard";
-import Modal from "../components/Modal";
-import TaskForm from "../components/TaskForm";
-import TagFilter from "../components/TagFilter";
+import { useParams } from "react-router-dom";
+import Header from "../components/Header";
+import { useData } from "../context/DataContext";
+import { useEffect, useState } from "react";
+import { task } from "../utility/types";
 import { mapIDsToNames } from "../utility/tagMapping";
-import { findDataWithID, isEqual, isNewData, BASE_URL } from "../utility/utilityComponent";
-import { FilterType, ModalType } from "../utility/types";
-import { arrayMove, SortableContext } from "@dnd-kit/sortable";
-import {
-  closestCorners,
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors
-} from "@dnd-kit/core";
+import TaskCard from "../components/TaskCard";
 
-import type { task } from "../utility/types";
-import { useOptions } from "../context/OptionsContext";
-
-function Task() {
+function TaskPage() {
+  const { id } = useParams<{ id: string }>();
   const emptyTask: task = {
     id: -1,
     name: "Add new task",
     tags: "",
   };
 
-  const defError = "Something went wrong :/";
-
-  const [tasks, setTasks] = useState<task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<task[]>([]);
-
-  const [activeTask, setActiveTask] = useState<task | undefined>(undefined);
   const [selectedTask, setSelectedTask] = useState<task>(emptyTask);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [currentTask, setCurrentTask] = useState<task[]>([]);
 
-  const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
-  const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
+  const {
+    tasks,
+    tagMap,
 
-  const { tagMap, setTagAddition, setTagDeletion, optionLoading, optionError } = useOptions();
+    activeTasks,
+    toggleActiveTask,
 
-  const isEditTaskDisabled = selectedTask.name === "" ||
-    (selectedTask.id > -1 && !isNewData<task>(tasks, selectedTask));
+    optionLoading,
+    optionError
+  } = useData();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 250,
-        tolerance: 5,
-      },
-    })
-  );
+  console.log(id);
 
   useEffect(() => {
-    const handleGlobalClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (target.classList.contains("modal-overlay")) {
-        if (isEditorOpen) setIsEditorOpen(false);
-        if (isAlertOpen) setIsAlertOpen(false);
+    if (id) {
+      const task = tasks.find(t => t.id === parseInt(id));
+      if (task) {
+        setSelectedTask(task);
       }
-    };
-
-    document.addEventListener("mousedown", handleGlobalClick);
-
-    return () => {
-      document.removeEventListener("mousedown", handleGlobalClick);
-    };
-  }, [isEditorOpen, isAlertOpen]);
-
-  useEffect(() => {
-    const preventDefault = (e: TouchEvent) => e.preventDefault();
-
-    if (activeTask) {
-      document.addEventListener("touchmove", preventDefault, { passive: false });
-    }
-    else {
-      document.removeEventListener("touchmove", preventDefault);
-    }
-
-    return () => {
-      document.removeEventListener("touchmove", preventDefault);
-    };
-  }, [activeTask]);
-
-  const handleDragStart = (event: DragStartEvent): void => {
-    const { active } = event;
-    setActiveTask(tasks.find(task => task.id === active.id));
-  };
-
-  const handleDragEnd = (event: DragEndEvent): void => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) {
-      setActiveTask(undefined);
-      return;
-    }
-
-    const activeIndex = tasks.findIndex(task => task.id === active.id);
-    const overIndex = tasks.findIndex(task => task.id === over.id);
-
-    if (activeIndex === -1 || overIndex === -1) {
-      setActiveTask(undefined);
-      return;
-    }
-
-    const updatedTasks = arrayMove(tasks, activeIndex, overIndex);
-
-    setTasks(updatedTasks);
-    setActiveTask(undefined);
-  };
-
-  const handleDragCancel = () => setActiveTask(undefined);
-
-  const fetchTasks = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const tasksResponse = await fetch(`${BASE_URL}/tasks`, { method: "GET" });
-      const tasksJson: task[] = await tasksResponse.json();
-
-      setTasks(tasksJson);
-    }
-    catch (err) {
-      setError(new Error(defError));
-      console.log(err);
-    }
-    finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const addTask = async (content: task) => {
-    const { name, tags } = content;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const postResponse = await fetch(`${BASE_URL}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, tags })
-      });
-
-      const { id } = await postResponse.json();
-      setTasks((prev) => [...prev, { id, name, tags }]);
-      console.log("adding task", { id, name, tags });
-    }
-    catch (err) {
-      setError(new Error("Adding task failed"));
-      console.log("[ Adding task failed ]\n", err);
-    }
-    finally {
-      setLoading(false);
-    }
-  };
-
-  const editTask = async (updatedTask: task) => {
-    const { id, name, tags } = updatedTask;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      await fetch(`${BASE_URL}/tasks/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, tags })
-      });
-
-      setTasks(prev =>
-        prev.map(elem => (elem.id === id ? updatedTask : elem))
-      );
-    }
-    catch (err) {
-      console.log("[ Editing task failed ]\n", err);
-      setError(new Error("Editing task failed"));
-    }
-    finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteTask = async (id: number) => {
-    console.log("deleting task", selectedTask);
-    setIsAlertOpen(false);
-    setIsEditorOpen(false);
-
-    try {
-      setLoading(true);
-      await fetch(`${BASE_URL}/tasks/${id}`, { method: "DELETE" });
-
-      const updated = tasks.filter(task => task.id !== id)
-      setTasks(updated);
-    }
-    catch (err) {
-      console.log("[ Deleting task failed ]\n", err);
-      setError(new Error("Deleting task failed"));
-    }
-    finally {
-      setLoading(false);
-    }
-  };
-
-  const onCardClicked = (id: number) => {
-    setIsEditorOpen(true);
-    if (id < -1) {
-      setError(new Error(defError))
-      return;
-    }
-
-    const cardDetails: task = tasks.find(elem => elem.id === id) || { ...emptyTask, name: "" };
-    setSelectedTask(cardDetails);
-  };
-
-  const handleTaskSubmission = (id: number) => {
-    setIsEditorOpen(false);
-    if (selectedTask.name === "" || (id > -1 && !isNewData<task>(tasks, selectedTask))) {
-      setError(new Error("Input was invalid or unchanged"));
-      console.log("Invalid input");
-      return;
-    }
-
-    if (id < -1) {
-      setError(new Error(defError))
-      return;
-    }
-    else if (id === -1) {
-      addTask(selectedTask);
-    }
-    else {
-      const current = findDataWithID<task>(tasks, id);
-
-      if (!current) {
-        setError(new Error(defError));
-        return;
+    } else {
+      const activeTaskId = tasks.filter(t => activeTasks[t.id]);
+      setCurrentTask(activeTaskId);
+      if (activeTaskId.length > 0) {
+        setSelectedTask(activeTaskId[0]);
       }
-
-      if (isEqual<task>(current, selectedTask)) {
-        setError(new Error("Data did not change"));
-        return;
-      };
-
-      editTask(selectedTask);
-      console.log("editing task", selectedTask);
     }
-  };
-
-  const onFilterChange = useCallback((chosenTags: string[], type: FilterType) => {
-    const tagFilters: task[] = tasks.filter((task) => {
-      const tagArray = task.tags.split(",");
-      if (type === FilterType.AND) {
-        return chosenTags.length === 0 || chosenTags.every(tag => tagArray.includes(tag));
-      }
-      else {
-        return chosenTags.length === 0 || chosenTags.some(tag => tagArray.includes(tag));
-      }
-    });
-
-    setFilteredTasks(tagFilters);
-  }, [tasks]);
+  }, [id, tasks, activeTasks]);
 
   return (
     <div className="page task-page">
       <Header />
       <div className="page-header">
-        <h1>Tasks</h1>
-        <TagFilter
-          tagMap={tagMap}
-          onFilterChange={onFilterChange}
-        />
+        <h1>{selectedTask.name}</h1>
       </div>
       <div className="content task-content">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-          <ul className="tasks-display">
-            {filteredTasks.length > 0 || tasks.length > 0 ?
-              <SortableContext
-                items={tasks.map(task => task.id)}
-              >
-                {filteredTasks.map((elem, i) => (
-                  <TaskCard
-                    key={i}
-                    taskId={elem.id}
-                    taskTitle={elem.name}
-                    taskTags={mapIDsToNames(elem.tags, tagMap)}
-                    onCardClicked={(id) => onCardClicked(id)}
-                  />
-                ))}
-              </SortableContext> :
-              <div className="is-empty-filter">
-                <p>No tasks found</p>
-              </div>
-            }
+        {id ? (
+          selectedTask.id !== -1 && (
             <TaskCard
-              isAdderTag={true}
-              taskId={emptyTask.id}
-              taskTitle={emptyTask.name}
-              taskTags={[""]}
-              onCardClicked={onCardClicked}
+              taskId={selectedTask.id}
+              taskTitle={selectedTask.name}
+              taskTags={mapIDsToNames(selectedTask.tags, tagMap)}
+              onCardClicked={() => { }}
+              isTaskActive={activeTasks[selectedTask.id]}
+              toggleTaskActiveState={toggleActiveTask}
             />
-          </ul>
-          <DragOverlay adjustScale style={{ transformOrigin: "0 0 " }}>
-            {activeTask ? (
+          )
+        ) :
+          (
+            currentTask.map(task => (
               <TaskCard
-                taskId={activeTask.id}
-                taskTitle={activeTask.name}
-                taskTags={mapIDsToNames(activeTask.tags, tagMap)}
+                key={task.id}
+                taskId={task.id}
+                taskTitle={task.name}
+                taskTags={mapIDsToNames(task.tags, tagMap)}
                 onCardClicked={() => { }}
+                isTaskActive={activeTasks[task.id]}
+                toggleTaskActiveState={toggleActiveTask}
               />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-        {selectedTask.id > -2 &&
-          <Modal
-            isDisabled={isEditTaskDisabled}
-            type={ModalType.form}
-            isOpen={isEditorOpen}
-            dialogue={selectedTask.id >= 0 ? "Edit task" : "Add a task"}
-            description={
-              <TaskForm
-                isDisabled={isEditTaskDisabled}
-                tagMap={tagMap}
-                selectedTask={selectedTask}
-                createTag={setTagAddition}
-                setSelectedTask={setSelectedTask}
-                handleTaskSubmission={handleTaskSubmission}
-                removeTagWithID={setTagDeletion}
-                removeSelectedTask={() => setIsAlertOpen(true)}
-              />
-            }
-            onConfirm={() => handleTaskSubmission(selectedTask.id)}
-            onCancel={() => setIsEditorOpen(false)}
-            zIndex={10}
-          />
-        }
-        <Modal
-          type={ModalType.alert}
-          dialogue="Delete task?"
-          isOpen={isAlertOpen}
-          description={<p>Are you sure you want to delete task <b>{selectedTask.name}</b>?</p>}
-          onConfirm={() => deleteTask(selectedTask.id)}
-          onCancel={() => setIsAlertOpen(false)}
-          zIndex={20}
-        />
-        {(loading || optionLoading) && <div className="loading-spinner">Loading...</div>}
-        {(error || optionError) && <p className="error-message">{((error || optionError) as Error).message}</p>}
+            ))
+          )}
+        {optionLoading && <div className="loading-spinner">Loading...</div>}
+        {optionError && <p className="error-message">{(optionError as Error).message}</p>}
       </div>
     </div>
   );
 }
 
-export default Task;
+export default TaskPage;
