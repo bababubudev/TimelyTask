@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ModalType } from "../utility/types";
+import { isFirefox } from "../utility/utilityComponent";
 
 interface ModalProps {
   zIndex?: number;
@@ -155,7 +156,11 @@ function Modal({
 
   return (
     <div
-      className={`modal-overlay ${isOpen ? "visible" : "hidden"}`}
+      className={`
+        modal-overlay
+        ${isOpen ? "visible" : "hidden"}
+        ${isFirefox ? "firefox" : ""}
+      `}
       style={{ zIndex }}
     >
       {renderContent()}

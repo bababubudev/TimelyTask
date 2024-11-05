@@ -124,7 +124,7 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
           type="text"
           id="task-tags"
           autoComplete="off"
-          placeholder="Choose a tag to add"
+          placeholder="Click to add tags"
           list="suggestions"
           value={tagInput}
           onChange={handleTagChange}
@@ -178,11 +178,11 @@ function TaskForm({ isDisabled, tagMap, selectedTask, createTag, setSelectedTask
         </button>
       }
       <TagForm
-        createTagForm={createTagForm}
+        isFormOpen={createTagForm}
         tagMap={tagMap}
-        createTag={createTag}
+        addTag={createTag}
         removeTagWithID={removeTagWithID}
-        setCreateTagForm={setCreateTagForm}
+        setIsFormOpen={setCreateTagForm}
       />
     </>
   );

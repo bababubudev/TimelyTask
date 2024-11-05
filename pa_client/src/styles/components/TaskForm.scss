@@ -1,3 +1,10 @@
+.firefox .description .tag-btns .selected-tags {
+  height: 3.5rem;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--col-secondary) transparent;
+}
+
 form {
   position: relative;
 
@@ -315,8 +322,8 @@ form {
   padding: 1rem;
 
   span {
-    background: var(--col-window-bg);
-    color: var(--col-white);
+    background: var(--col-accent);
+    color: var(--col-window-bg);
 
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;

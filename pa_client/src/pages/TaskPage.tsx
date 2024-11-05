@@ -20,7 +20,8 @@ import {
   useSensors
 } from "@dnd-kit/core";
 
-import type { task, tag, mappedTag } from "../utility/types";
+import type { task } from "../utility/types";
+import { useOptions } from "../context/OptionsContext";
 
 function Task() {
   const emptyTask: task = {
@@ -33,7 +34,6 @@ function Task() {
 
   const [tasks, setTasks] = useState<task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<task[]>([]);
-  const [tagMap, setTagMap] = useState<mappedTag>({});
 
   const [activeTask, setActiveTask] = useState<task | undefined>(undefined);
   const [selectedTask, setSelectedTask] = useState<task>(emptyTask);
@@ -42,6 +42,8 @@ function Task() {
 
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
+
+  const { tagMap, setTagAddition, setTagDeletion, optionLoading, optionError } = useOptions();
 
   const isEditTaskDisabled = selectedTask.name === "" ||
     (selectedTask.id > -1 && !isNewData<task>(tasks, selectedTask));
@@ -116,7 +118,7 @@ function Task() {
 
   const handleDragCancel = () => setActiveTask(undefined);
 
-  const fetchAllData = async () => {
+  const fetchTasks = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -124,14 +126,7 @@ function Task() {
       const tasksResponse = await fetch(`${BASE_URL}/tasks`, { method: "GET" });
       const tasksJson: task[] = await tasksResponse.json();
 
-      const tagsResponse = await fetch(`${BASE_URL}/tags`, { method: "GET" });
-      const tagsJson: tag[] = await tagsResponse.json();
-
-      const tagMap: mappedTag = {};
-      tagsJson.forEach(elem => { tagMap[elem.id] = elem.name });
-
       setTasks(tasksJson);
-      setTagMap(tagMap);
     }
     catch (err) {
       setError(new Error(defError));
@@ -143,7 +138,7 @@ function Task() {
   };
 
   useEffect(() => {
-    fetchAllData();
+    fetchTasks();
   }, []);
 
   const addTask = async (content: task) => {
@@ -218,57 +213,6 @@ function Task() {
       setLoading(false);
     }
   };
-
-  const addTag = async (tagName: string) => {
-    console.log("adding new tag", tagName);
-
-    const isExisting = Object.values(tagMap).includes(tagName);
-    if (isExisting) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      console.log(tagName);
-
-      const postResponse = await fetch(`${BASE_URL}/tags`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: tagName })
-      });
-
-      const { id } = await postResponse.json();
-      setTagMap(prev => ({ ...prev, [id]: tagName }));
-    }
-    catch (err) {
-      setError(new Error("Adding tag failed"));
-      console.log("[ Adding tag failed ]\n", err);
-    }
-    finally {
-      setLoading(false);
-    }
-  };
-
-  const removeTag = async (id: number) => {
-    console.log("deleting tag", tagMap[id]);
-
-    try {
-      setLoading(true);
-      await fetch(`${BASE_URL}/tags/${id}`, { method: "DELETE" });
-
-      setTagMap(prev => {
-        const updatedEntries = Object.entries(prev).filter(([key]) => key !== id.toString());
-        return Object.fromEntries(updatedEntries);
-      });
-    }
-    catch (err) {
-      console.log("[ Deleting tag failed ]\n", err);
-      setError(new Error("Deleting tag failed"));
-    }
-    finally {
-      setLoading(false);
-    }
-  }
 
   const onCardClicked = (id: number) => {
     console.log("wat");
@@ -396,10 +340,10 @@ function Task() {
                 isDisabled={isEditTaskDisabled}
                 tagMap={tagMap}
                 selectedTask={selectedTask}
-                createTag={addTag}
+                createTag={setTagAddition}
                 setSelectedTask={setSelectedTask}
                 handleTaskSubmission={handleTaskSubmission}
-                removeTagWithID={removeTag}
+                removeTagWithID={setTagDeletion}
                 removeSelectedTask={() => setIsAlertOpen(true)}
               />
             }
@@ -417,11 +361,11 @@ function Task() {
           onCancel={() => setIsAlertOpen(false)}
           zIndex={20}
         />
-        {loading && <div className="loading-spinner">Loading...</div>}
-        {error && <p className="error-message">{(error as Error).message}</p>}
+        {(loading || optionLoading) && <div className="loading-spinner">Loading...</div>}
+        {(error || optionError) && <p className="error-message">{((error || optionError) as Error).message}</p>}
       </div>
     </div>
-  )
+  );
 }
 
 export default Task;

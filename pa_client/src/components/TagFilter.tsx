@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FaFilter, FaFilterCircleXmark } from "react-icons/fa6";
 import { FilterType, mappedTag } from "../utility/types";
+import { isFirefox } from "../utility/utilityComponent";
 
 interface TagFilterProp {
   tagMap: mappedTag;
@@ -50,7 +51,7 @@ function TagFilter({ tagMap, onFilterChange }: TagFilterProp) {
 
   return (
     <div
-      className="filter"
+      className={`filter ${isFirefox ? "firefox" : ""}`}
       ref={filterRef}
     >
       <button className="filter-btn" onClick={toggleFilter}>

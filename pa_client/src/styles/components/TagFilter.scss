@@ -6,6 +6,11 @@
   margin-top: 1rem;
   margin-right: 1.5rem;
 
+  &.firefox .filter-items .filter-content {
+    scrollbar-width: thin;
+    scrollbar-color: var(--col-window-bg) transparent;
+  }
+
   .filter-btn {
     display: flex;
     gap: 0.25rem;
@@ -65,7 +70,7 @@
       box-shadow: inset 1px 1px 5px var(--col-window-bg);
       border-radius: 0.25rem;
 
-      padding-left: 0.2rem;
+      padding-left: 0.5rem;
       max-height: 15rem;
       overflow-y: scroll;
       scrollbar-gutter: stable;
@@ -75,8 +80,8 @@
         align-items: center;
         user-select: none;
         gap: 1rem;
+        padding: 0.6rem 0.5rem;
 
-        padding: 0.5rem;
         cursor: pointer;
 
         input[type="checkbox"] {

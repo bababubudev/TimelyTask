@@ -3,10 +3,20 @@ import Header from "../components/Header"
 import Modal from "../components/Modal";
 import { ModalType, ThemeType } from "../utility/types";
 import { useOptions } from "../context/OptionsContext";
+import TagForm from "../components/TagForm";
 
 function Option() {
-  const { options, setOptions } = useOptions();
+  const {
+    options,
+    setOptions,
+    tagMap,
+    setTagAddition,
+    setTagDeletion,
+    optionLoading,
+    optionError
+  } = useOptions();
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
+  const [isTagFormOpen, setIsTagFormOpen] = useState<boolean>(false);
 
   const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const theme = e.target.value as ThemeType;
@@ -45,6 +55,14 @@ function Option() {
           onConfirm={() => setIsAboutOpen(false)}
           onCancel={() => setIsAboutOpen(false)}
         />
+        <button onClick={() => setIsTagFormOpen(prev => !prev)}>Tags</button>
+        <TagForm
+          isFormOpen={isTagFormOpen}
+          tagMap={tagMap}
+          addTag={setTagAddition}
+          removeTagWithID={setTagDeletion}
+          setIsFormOpen={setIsTagFormOpen}
+        />
         <div>
           <p>Current Theme: {options?.theme ?? ThemeType.default}</p>
           <select value={options?.theme} onChange={handleThemeChange}>
@@ -53,6 +71,8 @@ function Option() {
             <option value={ThemeType.dark}>Dark</option>
           </select>
         </div>
+        {optionLoading && <div className="loading-spinner">Loading...</div>}
+        {optionError && <p className="error-message">{(optionError as Error).message}</p>}
       </div>
     </div>
   )

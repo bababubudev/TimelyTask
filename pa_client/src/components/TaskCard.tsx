@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MdDragIndicator } from "react-icons/md";
+import { isFirefox } from "../utility/utilityComponent";
 
 interface TaskCardProps {
   isAdderTag?: boolean;
@@ -23,8 +24,8 @@ function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, ta
   } = useSortable({ id: taskId });
 
   const style = {
-    transition: isAdderTag ? undefined : transition,
-    transform: isAdderTag ? undefined : CSS.Transform.toString(transform),
+    transition: transition,
+    transform: CSS.Transform.toString(transform),
     opacity: isDragging ? 0.6 : 1,
   };
 
@@ -34,21 +35,28 @@ function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, ta
 
   return (
     <div
-      className={`task-card ${isAdderTag ? "adder-tag" : ""}`}
+      className={`
+        task-card
+        ${isAdderTag ? "adder-tag" : ""}
+        ${isFirefox ? "firefox" : ""}
+      `}
       onClick={() => onCardClicked(taskId)}
       ref={isAdderTag ? null : setNodeRef}
       style={style}
     >
       <h2 className="task-name">{taskTitle}</h2>
       <div className="tag-list">
-        {taskTags && taskTags.map((elem, i) => (
-          <span
-            key={i}
-            className={`tag-name ${elem === "important" ? "imp" : ""}`}
-          >
-            {elem}
-          </span>
-        ))}
+        {taskTags && taskTags.length > 0 ?
+          taskTags.map((elem, i) => (
+            <span
+              key={i}
+              className={`tag-name ${elem === "important" ? "imp" : ""}`}
+            >
+              {elem}
+            </span>
+          )) :
+          <span className="no-tag">...</span>
+        }
       </div>
       {isAdderTag &&
         <button className="add-tag">

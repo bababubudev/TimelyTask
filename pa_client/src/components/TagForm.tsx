@@ -5,14 +5,14 @@ import { IoInformationCircle } from "react-icons/io5";
 
 interface TagModifyProp {
   tagMap: mappedTag;
-  createTagForm: boolean;
+  isFormOpen: boolean;
 
-  createTag: (name: string) => void;
+  addTag: (name: string) => void;
   removeTagWithID: (id: number) => void;
-  setCreateTagForm: (value: boolean) => void;
+  setIsFormOpen: (value: boolean) => void;
 }
 
-function TagForm({ createTagForm, tagMap, createTag, removeTagWithID, setCreateTagForm }: TagModifyProp) {
+function TagForm({ isFormOpen: createTagForm, tagMap, addTag: createTag, removeTagWithID, setIsFormOpen: setCreateTagForm }: TagModifyProp) {
   const [tagInput, setTagInput] = useState<string>("");
   const [removalID, setRemovalID] = useState<number>(-2);
   const [removeTagAlert, setRemoveTagAlert] = useState<boolean>(false);
@@ -69,7 +69,7 @@ function TagForm({ createTagForm, tagMap, createTag, removeTagWithID, setCreateT
       dialogue="Modify tags"
       description={
         <>
-          <div className="name-area is-tag">
+          <div className={`name-area is-tag`}>
             <label
               className={`${tagInput !== "" ? "has-text" : ""}`}
               htmlFor="task-tags"

@@ -23,3 +23,91 @@
     }
   }
 }
+
+.modal-overlay .description {
+  .name-area {
+    display: grid;
+    position: relative;
+
+    label {
+      $transition-speed: 0.05s;
+      position: absolute;
+      top: 0.7rem;
+      left: 0.7rem;
+      background: none;
+      color: var(--col-window-bg-faded);
+      font-size: 1.25rem;
+      transition: left $transition-speed linear,
+        top $transition-speed linear,
+        font-size $transition-speed linear,
+        background-color $transition-speed linear;
+      pointer-events: none;
+    }
+
+    input {
+      font-size: 1.25rem;
+      outline: none;
+      color: var(--col-window-bg);
+      background: none;
+      border: 1px solid var(--col-window-bg);
+      border-radius: 0.25rem;
+      padding: 0.75rem;
+      padding-right: 5.25rem;
+
+      &::placeholder {
+        color: transparent;
+        font-family: monospace;
+        font-size: 1.25rem;
+      }
+
+      &:focus {
+        border: 1px solid var(--col-secondary);
+
+        &::placeholder {
+          color: var(--col-window-bg-faded);
+        }
+      }
+    }
+
+    &:focus-within {
+      label {
+        top: -0.75rem;
+        left: 0.5rem;
+        font-size: 1rem;
+        background: var(--col-white);
+        color: var(--col-window-bg);
+      }
+
+      label.has-text {
+        top: -0.75rem;
+        left: 0.5rem;
+        font-size: 1rem;
+        background: var(--col-white);
+        color: var(--col-window-bg);
+      }
+
+      label {
+        color: var(--col-secondary);
+      }
+    }
+
+    .add-tag-btn {
+      position: absolute;
+      right: 0;
+      height: 100%;
+      padding: 0.75rem;
+      background: var(--col-secondary);
+      color: var(--col-white);
+      border: none;
+      border-radius: 0 0.25rem 0.25rem 0;
+
+      &:disabled {
+        background: var(--col-window-bg-faded);
+      }
+
+      &:active {
+        background-color: var(--col-window-bg);
+      }
+    }
+  }
+}
