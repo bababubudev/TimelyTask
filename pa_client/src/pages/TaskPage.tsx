@@ -7,8 +7,18 @@ import TagFilter from "../components/TagFilter";
 import { mapIDsToNames } from "../utility/tagMapping";
 import { findDataWithID, isEqual, isNewData, BASE_URL } from "../utility/utilityComponent";
 import { FilterType, ModalType } from "../utility/types";
-import { closestCorners, DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext } from "@dnd-kit/sortable";
+import {
+  closestCorners,
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors
+} from "@dnd-kit/core";
 
 import type { task, tag, mappedTag } from "../utility/types";
 
@@ -17,7 +27,6 @@ function Task() {
     id: -1,
     name: "Add new task",
     tags: "",
-    position: -1,
   };
 
   const defError = "Something went wrong :/";
@@ -37,7 +46,15 @@ function Task() {
   const isEditTaskDisabled = selectedTask.name === "" ||
     (selectedTask.id > -1 && !isNewData<task>(tasks, selectedTask));
 
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  );
 
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
@@ -54,6 +71,50 @@ function Task() {
       document.removeEventListener("mousedown", handleGlobalClick);
     };
   }, [isEditorOpen, isAlertOpen]);
+
+  useEffect(() => {
+    const preventDefault = (e: TouchEvent) => e.preventDefault();
+
+    if (activeTask) {
+      document.addEventListener("touchmove", preventDefault, { passive: false });
+    }
+    else {
+      document.removeEventListener("touchmove", preventDefault);
+    }
+
+    return () => {
+      document.removeEventListener("touchmove", preventDefault);
+    };
+  }, [activeTask]);
+
+  const handleDragStart = (event: DragStartEvent): void => {
+    const { active } = event;
+    setActiveTask(tasks.find(task => task.id === active.id));
+  };
+
+  const handleDragEnd = (event: DragEndEvent): void => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      setActiveTask(undefined);
+      return;
+    }
+
+    const activeIndex = tasks.findIndex(task => task.id === active.id);
+    const overIndex = tasks.findIndex(task => task.id === over.id);
+
+    if (activeIndex === -1 || overIndex === -1) {
+      setActiveTask(undefined);
+      return;
+    }
+
+    const updatedTasks = arrayMove(tasks, activeIndex, overIndex);
+
+    setTasks(updatedTasks);
+    setActiveTask(undefined);
+  };
+
+  const handleDragCancel = () => setActiveTask(undefined);
 
   const fetchAllData = async () => {
     try {
@@ -99,7 +160,7 @@ function Task() {
       });
 
       const { id } = await postResponse.json();
-      setTasks((prev) => [...prev, { id, name, tags, position: prev.length + 1 }]);
+      setTasks((prev) => [...prev, { id, name, tags }]);
       console.log("adding task", { id, name, tags });
     }
     catch (err) {
@@ -271,37 +332,6 @@ function Task() {
     setFilteredTasks(tagFilters);
   }, [tasks]);
 
-  const handleDragStart = (event: DragStartEvent): void => {
-    const { active } = event;
-    setActiveTask(tasks.find(task => task.position === active.id));
-  };
-
-  const handleDragEnd = (event: DragEndEvent): void => {
-    const { active, over } = event;
-
-    if (!over) return;
-
-    const activeItem = tasks.find(elem => elem.position === active.id);
-    const overItem = tasks.find(elem => elem.position === over.id);
-
-    if (!activeItem || !overItem) {
-      return;
-    }
-
-    const activeIndex = tasks.findIndex(task => task.position === active.id);
-    const overIndex = tasks.findIndex(task => task.position === over.id);
-
-    if (activeIndex !== overIndex) {
-      setTasks(prev => {
-        const updated = arrayMove(prev, activeIndex, overIndex).map((task, i) => ({ ...task, position: i + 1 }));
-        return updated;
-      });
-    }
-    setActiveTask(undefined);
-  };
-
-  const handleDragCancel = () => setActiveTask(undefined);
-
   return (
     <div className="page task-page">
       <Header />
@@ -323,14 +353,13 @@ function Task() {
           <ul className="tasks-display">
             {filteredTasks.length > 0 || tasks.length > 0 ?
               <SortableContext
-                items={tasks.map(task => task.position)}
+                items={tasks.map(task => task.id)}
               >
                 {filteredTasks.map((elem, i) => (
                   <TaskCard
                     key={i}
                     taskId={elem.id}
                     taskTitle={elem.name}
-                    taskPosition={elem.position}
                     taskTags={mapIDsToNames(elem.tags, tagMap)}
                     onCardClicked={(id) => onCardClicked(id)}
                   />
@@ -345,7 +374,6 @@ function Task() {
               taskId={emptyTask.id}
               taskTitle={emptyTask.name}
               taskTags={[""]}
-              taskPosition={emptyTask.position}
               onCardClicked={onCardClicked}
             />
           </ul>
@@ -355,7 +383,6 @@ function Task() {
                 taskId={activeTask.id}
                 taskTitle={activeTask.name}
                 taskTags={mapIDsToNames(activeTask.tags, tagMap)}
-                taskPosition={activeTask.position}
                 onCardClicked={() => { }}
               />
             ) : null}

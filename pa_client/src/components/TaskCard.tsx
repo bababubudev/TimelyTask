@@ -7,12 +7,11 @@ interface TaskCardProps {
   isOverlay?: boolean;
   taskId: number;
   taskTitle: string;
-  taskPosition: number;
   taskTags: string[];
   onCardClicked: (id: number) => void;
 }
 
-function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, taskPosition, taskTags, onCardClicked }: TaskCardProps) {
+function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, taskTags, onCardClicked }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -21,7 +20,7 @@ function TaskCard({ isOverlay = false, isAdderTag = false, taskId, taskTitle, ta
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: taskPosition });
+  } = useSortable({ id: taskId });
 
   const style = {
     transition: isAdderTag ? undefined : transition,

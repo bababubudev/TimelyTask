@@ -109,34 +109,18 @@
 }
 
 .drag-handle {
-  svg {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-    opacity: 0.6;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  opacity: 0.6;
 
+  svg {
     color: var(--col-window-bg);
     width: 2rem;
     height: 2rem;
-
-    &:active {
-      color: var(--col-primary);
-    }
   }
 
-  .index {
-    user-select: none;
-    pointer-events: none;
-    opacity: 0.2;
-
-    position: absolute;
-    bottom: 0;
-    right: 1rem;
-
-    font-size: 3rem;
-    font-weight: 200;
-    font-style: italic;
-
-    color: var(--col-window-bg);
+  &:hover {
+    opacity: 1;
   }
 }
