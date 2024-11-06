@@ -50,6 +50,7 @@ function Option() {
                 <ul>
                   <li>you can change views from top of the app</li>
                   <li>to add new task click on add task with + icon on it</li>
+                  <li>In order to add tags to a task, <b>IN FIREFOX</b> double click on the input box to make it show suggestions. (PART OF THE DATASET)</li>
                   <li>on the task page it is possible to edit an existing task by pressing on the edit button situated on the top left side of the corresponding task</li>
                   <li>to delete a task click on the <b>edit</b> button on the top right corner of the corresponding task card</li>
                   <li>activating and deactivating task requires you to simply click on the <b>"inactive"</b> button on the corresponding task</li>
