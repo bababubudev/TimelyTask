@@ -1,26 +1,26 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "../pages/HomePage";
-import Task from "../pages/TaskPage";
+import TaskPage from "../pages/TaskPage";
 import Option from "../pages/OptionsPage";
+import DetailPage from "../pages/DetailsPage";
 
 export const routes = [
-  { path: "/", label: "Home" },
-  { path: "/task", label: "Task" },
+  { path: "/", label: "Tasks" },
+  { path: "/summary", label: "Details" },
   { path: "/option", label: "Options" }
 ];
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: <TaskPage />,
   },
   {
-    path: "/task",
-    element: <Task />,
+    path: "/summary",
+    element: <DetailPage />,
   },
   {
-    path: "/task/:id",
-    element: <Task />,
+    path: "/summary/:id",
+    element: <DetailPage />,
   },
   {
     path: "/option",

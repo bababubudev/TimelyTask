@@ -35,8 +35,11 @@ export type timestamp = {
   type: number,
 };
 
+export type activeTime = { [key: string]: number };
 export type timestampMap = { [key: string]: timestamp[] };
 export type taskActivityMap = { [key: string]: boolean };
+export type observationInterval = { start: Date, end: Date };
+export type activityInterval = { start: Date, end: Date | null };
 
 export type options = {
   id: number,

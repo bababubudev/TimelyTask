@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { OptionsContext } from "./DataContext";
-import type { mappedTag, options, tag, task, timestampMap, taskActivityMap, timestamp } from "../utility/types";
+import type { mappedTag, options, tag, task, timestampMap, taskActivityMap, timestamp, observationInterval, activeTime, activityInterval, ThemeType } from "../utility/types";
 import { BASE_URL } from "../utility/utilityComponent";
+import { differenceInMilliseconds, eachDayOfInterval, endOfDay, formatISO, parseISO, startOfDay } from "date-fns";
 
 interface DataProviderProps {
   children: React.ReactNode;
@@ -9,6 +10,8 @@ interface DataProviderProps {
 
 function DataProvider({ children }: DataProviderProps) {
   const [tasks, setTasks] = useState<task[]>([]);
+
+  // const [timestamps, setTimestamps] = useState<timestamp[]>([]);
   const [timestampMap, setTimestampMap] = useState<timestampMap>({});
   const [activeTasks, setActiveTasks] = useState<taskActivityMap>({});
 
@@ -17,6 +20,16 @@ function DataProvider({ children }: DataProviderProps) {
 
   const [optionError, setOptionError] = useState<Error | null>(null);
   const [optionLoading, setOptionLoading] = useState<boolean>(false);
+
+  const [observationInterval, setObservationInterval] = useState<observationInterval>({
+    start: startOfDay(new Date()),
+    end: new Date()
+  });
+
+  const [taskDetailsInterval, setTaskDetailsInterval] = useState<activityInterval>({
+    start: startOfDay(new Date()),
+    end: new Date()
+  });
 
   const fetchData = useCallback(async (url: string, options: RequestInit = {}) => {
     setOptionLoading(true);
@@ -33,30 +46,130 @@ function DataProvider({ children }: DataProviderProps) {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        const [tasks, tags, timestamps, options] = await Promise.all([
-          fetchData(`${BASE_URL}/tasks`),
-          fetchData(`${BASE_URL}/tags`),
-          fetchData(`${BASE_URL}/timestamps`),
-          fetchData(`${BASE_URL}/options/1`),
-        ]);
+  const calculateActiveTimes = useCallback((start: Date, end: Date) => {
+    const taskActiveTimes: activeTime = {};
+    const tagActiveTimes: activeTime = {};
 
-        const [tasksData, tagsData, timestampData, optionsData] = await Promise.all([
-          tasks,
-          tags,
-          timestamps,
-          options
-        ]);
+    Object.entries(timestampMap).forEach(([taskId, timestamps]) => {
+      let totalActiveTime = 0;
+      let lastStartTime: Date | null = null;
 
-        const tagMap: mappedTag = {};
-        const newstamp: timestampMap = {};
-        const newActivity: taskActivityMap = {};
+      timestamps.forEach(ts => {
+        const timestamp = parseISO(ts.timestamp);
+        if (timestamp >= start && timestamp <= end) {
+          if (ts.type === 0) {
+            lastStartTime = timestamp;
+          } else if (ts.type === 1 && lastStartTime) {
+            totalActiveTime += (timestamp.getTime() - lastStartTime.getTime());
+            lastStartTime = null;
+          }
+        }
+      });
 
-        tagsData.forEach((tag: tag) => { tagMap[tag.id] = tag.name });
+      if (lastStartTime) {
+        totalActiveTime += (end.getTime() - (lastStartTime as Date).getTime());
+      }
 
-        timestampData.forEach((elem: timestamp) => {
+      if (totalActiveTime > 0) {
+        taskActiveTimes[parseInt(taskId)] = totalActiveTime;
+        const task = tasks.find(t => t.id === parseInt(taskId));
+        if (task) {
+          task.tags.split(',').forEach(tagId => {
+            if (!tagActiveTimes[tagId]) {
+              tagActiveTimes[tagId] = 0;
+            }
+            tagActiveTimes[tagId] += totalActiveTime;
+          });
+        }
+      }
+    });
+
+    return { taskActiveTimes, tagActiveTimes };
+  }, [tasks, timestampMap]);
+
+  const calculateDailyActiveTimes = useCallback((taskId: number, start: Date, end: Date): activeTime => {
+    const dailyActiveTimes: activeTime = {};
+    const timestamps = timestampMap[taskId] || [];
+
+    const days = eachDayOfInterval({ start, end });
+
+    days.forEach(day => {
+      const dayStart = startOfDay(day);
+      const dayEnd = endOfDay(day);
+      let totalActiveTime = 0;
+      let lastStartTime: Date | null = null;
+
+      timestamps.forEach(ts => {
+        const timestamp = parseISO(ts.timestamp);
+        if (timestamp >= dayStart && timestamp <= dayEnd) {
+          if (ts.type === 0) {
+            lastStartTime = timestamp;
+          } else if (ts.type === 1 && lastStartTime) {
+            totalActiveTime += differenceInMilliseconds(timestamp, lastStartTime);
+            lastStartTime = null;
+          }
+        }
+      });
+
+      if (lastStartTime) {
+        totalActiveTime += differenceInMilliseconds(dayEnd, lastStartTime);
+      }
+
+      dailyActiveTimes[dayStart.toISOString()] = totalActiveTime;
+    });
+
+    return dailyActiveTimes;
+  }, [timestampMap]);
+
+  const getActivityIntervals = useCallback((taskId: number, start: Date, end: Date): activityInterval[] => {
+    const intervals: { start: Date, end: Date | null }[] = [];
+    const timestamps = timestampMap[taskId] || [];
+
+    let lastStartTime: Date | null = null;
+
+    timestamps.forEach(ts => {
+      const timestamp = parseISO(ts.timestamp);
+      if (timestamp >= start && timestamp <= end) {
+        if (ts.type === 0) {
+          lastStartTime = timestamp;
+        } else if (ts.type === 1 && lastStartTime) {
+          intervals.push({ start: lastStartTime, end: timestamp });
+          lastStartTime = null;
+        }
+      }
+    });
+
+    if (lastStartTime) {
+      intervals.push({ start: lastStartTime, end: null });
+    }
+
+    return intervals;
+  }, [timestampMap]);
+
+  const fetchAllData = useCallback(async () => {
+    try {
+      const [tasks, tags, timestamps, options] = await Promise.all([
+        fetchData(`${BASE_URL}/tasks`),
+        fetchData(`${BASE_URL}/tags`),
+        fetchData(`${BASE_URL}/timestamps`),
+        fetchData(`${BASE_URL}/options/1`),
+      ]);
+
+      const [tasksData, tagsData, timestampData, optionsData] = await Promise.all([
+        tasks,
+        tags,
+        timestamps,
+        options
+      ]);
+
+      const tagMap: mappedTag = {};
+      const newstamp: timestampMap = {};
+      const newActivity: taskActivityMap = {};
+
+      tagsData.forEach((tag: tag) => { tagMap[tag.id] = tag.name });
+
+      timestampData.sort((a: timestamp, b: timestamp) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+        .forEach((elem: timestamp) => {
           if (!newstamp[elem.task]) {
             newstamp[elem.task] = [];
           }
@@ -65,19 +178,26 @@ function DataProvider({ children }: DataProviderProps) {
           newActivity[elem.task] = elem.type === 0;
         });
 
-        setTasks(tasksData);
-        setTagMap(tagMap);
+      setTasks(tasksData);
+      setTagMap(tagMap);
 
-        setTimestampMap(newstamp);
-        setActiveTasks(newActivity);
-        setOptions(optionsData[0]);
-      } catch (err) {
-        console.log("[ Error fetching options and tags ]\n", err);
-      }
-    };
-
-    fetchAllData();
+      // setTimestamps(timestampData);
+      setTimestampMap(newstamp);
+      setActiveTasks(newActivity);
+      setOptions(optionsData[0]);
+    } catch (err) {
+      console.log("[ Error fetching options and tags ]\n", err);
+    }
   }, [fetchData]);
+
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
+
+  const applyTheme = (theme: ThemeType) => {
+    document.documentElement.classList.remove("light", "dark", "default");
+    document.documentElement.classList.add(theme);
+  };
 
   const handleSetOptions = async (changes: Partial<options>) => {
     try {
@@ -86,10 +206,89 @@ function DataProvider({ children }: DataProviderProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(changes),
       });
-      setOptions(prev => ({ ...prev, ...changes }) as options);
+      setOptions(prev => {
+        const newOptions = { ...prev, ...changes } as options;
+        if (changes.theme) {
+          applyTheme(changes.theme);
+        }
+        return newOptions;
+      });
     } catch (err) {
       setOptionError(new Error("Failed to update options"));
       console.error("Error updating options:", err);
+    }
+  };
+
+  const addActivityInterval = async (taskId: number, interval: activityInterval) => {
+    try {
+      setOptionLoading(true);
+      const response = await fetch(`${BASE_URL}/timestamps`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          task: taskId,
+          timestamp: formatISO(interval.start),
+          type: 0
+        })
+      });
+
+      const startTimestamp = await response.json();
+      console.log("start timestamp", startTimestamp);
+
+      if (interval.end) {
+        await fetch(`${BASE_URL}/timestamps`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            task: taskId,
+            timestamp: formatISO(interval.end),
+            type: 1
+          })
+        });
+      }
+
+      fetchAllData();
+    } catch (err) {
+      setOptionError(new Error("Failed to add activity interval"));
+      console.error("[ Error adding activity interval ]\n", err);
+    } finally {
+      setOptionLoading(false);
+    }
+  };
+
+  const removeActivityInterval = async (taskId: number, interval: activityInterval) => {
+    try {
+      setOptionLoading(true);
+      const timestamps = timestampMap[taskId] || [];
+      const startTimestamp = timestamps.find(ts => ts.timestamp === formatISO(interval.start) && ts.type === 0);
+      const endTimestamp = interval.end ? timestamps.find(ts => ts.timestamp === formatISO(interval.end ?? "") && ts.type === 1) : null;
+
+      if (startTimestamp) {
+        await fetch(`${BASE_URL}/timestamps/${startTimestamp.id}`, { method: "DELETE" });
+      }
+      if (endTimestamp) {
+        await fetch(`${BASE_URL}/timestamps/${endTimestamp.id}`, { method: "DELETE" });
+      }
+
+      fetchAllData();
+    } catch (err) {
+      setOptionError(new Error("Failed to remove activity interval"));
+      console.error("[ Error removing activity interval ]\n", err);
+    } finally {
+      setOptionLoading(false);
+    }
+  };
+
+  const modifyActivityInterval = async (taskId: number, oldInterval: activityInterval, newInterval: activityInterval) => {
+    try {
+      setOptionLoading(true);
+      await removeActivityInterval(taskId, oldInterval);
+      await addActivityInterval(taskId, newInterval);
+    } catch (err) {
+      setOptionError(new Error("Failed to modify activity interval"));
+      console.error("[ Error modifying activity interval ]\n", err);
+    } finally {
+      setOptionLoading(false);
     }
   };
 
@@ -184,9 +383,13 @@ function DataProvider({ children }: DataProviderProps) {
   const setTaskDelete = async (id: number) => {
     try {
       setOptionLoading(true);
+
+      // const deletionTimes = timestamps.map(elem => elem.task === id ? elem : null).filter(elem => elem !== null);
+      // console.log(deletionTimes);
+      // await Promise.all(deletionTimes.map(elem => fetch(`${BASE_URL}/timesfortask/${elem.id}`, { method: "DELETE" })));
       await fetch(`${BASE_URL}/tasks/${id}`, { method: "DELETE" });
 
-      const updated = tasks.filter(task => task.id !== id)
+      const updated = tasks.filter(task => task.id !== id);
       setTasks(updated);
     }
     catch (err) {
@@ -205,17 +408,34 @@ function DataProvider({ children }: DataProviderProps) {
       setOptionLoading(true);
       setOptionError(null);
 
+      const newTimestamp = {
+        timestamp: formatISO(new Date()),
+        task: taskId,
+        type: isActive ? 1 : 0
+      };
+
       await fetch(`${BASE_URL}/timestamps`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          timestamp: new Date().toISOString(),
-          task: taskId,
-          type: isActive ? 1 : 0
-        })
+        body: JSON.stringify(newTimestamp)
       });
 
-      setActiveTasks(prev => ({ ...prev, [taskId]: !isActive }));
+      setActiveTasks(prev => {
+        const updatedActiveTasks: taskActivityMap = { ...prev, [taskId]: !isActive };
+        if (options?.alternative === 1 && !isActive) {
+          Object.keys(updatedActiveTasks).forEach(id => {
+            if (parseInt(id) !== taskId) {
+              updatedActiveTasks[parseInt(id)] = false;
+            }
+          });
+        }
+        return updatedActiveTasks;
+      });
+
+      setTimestampMap(prev => {
+        const updatedTimestamps = prev[taskId] ? [...prev[taskId], newTimestamp] : [newTimestamp];
+        return { ...prev, [taskId]: updatedTimestamps };
+      });
     }
     catch (err) {
       setOptionError(new Error("Toggling task state failed"));
@@ -226,12 +446,15 @@ function DataProvider({ children }: DataProviderProps) {
     }
   }
 
-
   const memoizedTasks = useMemo(() => tasks, [tasks]);
   const memoizedTimestampMap = useMemo(() => timestampMap, [timestampMap]);
   const memoizedActiveTasks = useMemo(() => activeTasks, [activeTasks]);
   const memoizedOptions = useMemo(() => options, [options]);
   const memoizedTagMap = useMemo(() => tagMap, [tagMap]);
+  const { taskActiveTimes, tagActiveTimes } = useMemo(() =>
+    calculateActiveTimes(observationInterval.start, observationInterval.end),
+    [observationInterval, calculateActiveTimes]
+  );
 
   return (
     <OptionsContext.Provider
@@ -239,6 +462,10 @@ function DataProvider({ children }: DataProviderProps) {
         tasks: memoizedTasks,
         timestampMap: memoizedTimestampMap,
         activeTasks: memoizedActiveTasks,
+        taskActiveTimes,
+        tagActiveTimes,
+        taskDetailsInterval,
+        observationInterval,
         tagMap: memoizedTagMap,
         options: memoizedOptions,
 
@@ -249,10 +476,19 @@ function DataProvider({ children }: DataProviderProps) {
         setTagAddition,
         setTagDeletion,
         setOptions: handleSetOptions,
+
         toggleActiveTask,
+        getActivityIntervals,
+        addActivityInterval,
+        removeActivityInterval,
+        modifyActivityInterval,
+        setTaskDetailsInterval,
+        setObservationInterval,
+        calculateDailyActiveTimes,
 
         optionLoading,
-        optionError
+        optionError,
+        fetchAllData
       }}
     >
       {children}

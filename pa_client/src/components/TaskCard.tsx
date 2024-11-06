@@ -1,13 +1,15 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MdDragIndicator } from "react-icons/md";
-import { formatHumanReadableDuration, isFirefox } from "../utility/utilityComponent";
+import { FaEdit } from "react-icons/fa";
+import { CgDetailsMore } from "react-icons/cg";
+import { isFirefox } from "../utility/utilityComponent";
+import { useNavigate } from "react-router-dom";
 
 interface TaskCardProps {
   isAdderTag?: boolean;
   isOverlay?: boolean;
   isTaskActive?: boolean;
-  taskDuration?: number;
   taskId: number;
   taskTitle: string;
   taskTags: string[];
@@ -19,7 +21,6 @@ function TaskCard({
   isOverlay = false,
   isAdderTag = false,
   isTaskActive = false,
-  taskDuration = 0,
   taskId,
   taskTitle,
   taskTags,
@@ -36,6 +37,8 @@ function TaskCard({
     isDragging,
   } = useSortable({ id: taskId });
 
+  const navigate = useNavigate();
+
   const style = {
     transition: transition,
     transform: CSS.Transform.toString(transform),
@@ -46,8 +49,6 @@ function TaskCard({
     cursor: isDragging || isOverlay ? "grabbing" : "grab",
   };
 
-  const currentTaskDuration = taskDuration <= 0 ? "Not Active" : formatHumanReadableDuration(taskDuration);
-
   return (
     <div
       className={`
@@ -55,7 +56,7 @@ function TaskCard({
         ${isAdderTag ? "adder-tag" : ""}
         ${isFirefox ? "firefox" : ""}
       `}
-      onClick={() => onCardClicked(taskId)}
+      onClick={() => { if (isAdderTag) onCardClicked(taskId); }}
       ref={isAdderTag ? null : setNodeRef}
       style={style}
     >
@@ -66,7 +67,12 @@ function TaskCard({
             <p>{isTaskActive ? "Active" : "Inactive"}</p>
             <span>•</span>
           </button>
-          {isTaskActive && <p className="duration">{currentTaskDuration}</p>}
+          <div className="interval-area">
+            <button onClick={() => navigate(`summary/${taskId}`)}>
+              <CgDetailsMore />
+              <p>details</p>
+            </button>
+          </div>
         </div>
       }
       <div className="tag-list">
@@ -88,14 +94,24 @@ function TaskCard({
         </button>
       }
       {!isAdderTag &&
-        <div
-          ref={setActivatorNodeRef}
-          className="drag-handle"
-          {...listeners}
-          {...attributes}
-          style={draggableStyles}
-        >
-          <MdDragIndicator />
+        <div className="task-modifiers">
+          <div className="edit-task-btn">
+            <button
+              onClick={() => onCardClicked(taskId)}
+            >
+              <FaEdit />
+              <p>edit</p>
+            </button>
+          </div>
+          <div
+            ref={setActivatorNodeRef}
+            className="drag-handle"
+            {...listeners}
+            {...attributes}
+            style={draggableStyles}
+          >
+            <MdDragIndicator />
+          </div>
         </div>
       }
     </div>

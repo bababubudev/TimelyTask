@@ -1,6 +1,7 @@
 @use "../styles/components/Header.scss";
 @use "../styles/pages/OptionsPage.scss";
-@use "../styles/pages/HomePage.scss";
+@use "../styles/pages/TaskPage.scss";
+@use "../styles/pages/DetailsPage.scss";
 
 :root {
   font-family: monospace;
@@ -23,6 +24,34 @@
   --col-window-bg-faded: rgba(36, 54, 66, 0.6);
 
   --header-margin-top: 8.5rem;
+
+  color: var(--col-white);
+  background-color: var(--col-window-bg);
+}
+
+html.light {
+  --col-window-bg: #ffffff;
+  --col-primary: orange;
+  --col-secondary: blue;
+  --col-accent: red;
+  --col-white: #000000;
+
+  --col-white-faded: rgba(0, 0, 0, 0.2);
+  --col-window-bg-faded: rgba(255, 255, 255, 0.6);
+
+  color: var(--col-white);
+  background-color: var(--col-window-bg);
+}
+
+html.dark {
+  --col-window-bg: #000000;
+  --col-primary: orange;
+  --col-secondary: blue;
+  --col-accent: red;
+  --col-white: #ffffff;
+
+  --col-white-faded: rgba(255, 255, 255, 0.6);
+  --col-window-bg-faded: rgba(0, 0, 0, 0.6);
 
   color: var(--col-white);
   background-color: var(--col-window-bg);

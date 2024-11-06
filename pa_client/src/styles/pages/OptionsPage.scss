@@ -3,9 +3,12 @@
 .option-content {
   display: grid;
   justify-content: center;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  padding: 1rem;
 
   >button {
-    margin-top: 1rem;
     padding: 1rem;
 
     font-weight: bolder;
@@ -20,6 +23,44 @@
       border: 2px solid none;
       background: var(--col-primary);
       color: var(--col-window-bg);
+    }
+  }
+
+  .theme-selector,
+  .mode-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 2px solid var(--col-primary);
+    border-radius: 1rem;
+    background: var(--col-window-bg);
+    color: var(--col-white);
+
+    label {
+      font-weight: bold;
+      color: var(--col-white);
+    }
+
+    select,
+    input[type="checkbox"] {
+      padding: 0.5rem;
+      border: 1px solid var(--col-primary);
+      border-radius: 0.25rem;
+      background: var(--col-white);
+      color: var(--col-window-bg);
+      font-size: 1rem;
+      outline: none;
+
+      &:focus {
+        border-color: var(--col-secondary);
+      }
+    }
+
+    input[type="checkbox"] {
+      width: 1.5rem;
+      height: 1.5rem;
     }
   }
 }

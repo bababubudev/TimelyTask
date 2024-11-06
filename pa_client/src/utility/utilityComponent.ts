@@ -1,4 +1,4 @@
-import { timestamp } from "./types";
+import { activityInterval, timestamp } from "./types";
 
 export const BASE_URL = "http://127.0.0.1:3010";
 
@@ -23,7 +23,11 @@ export function isNewData<T extends { id: number }>(data: T[], compareData: T): 
   return true;
 }
 
-export function formatHumanReadableDuration(ms: number) {
+export function formatDuration(ms: string | number, isPrecise = true) {
+  if (typeof ms === "string") {
+    ms = parseInt(ms);
+  }
+
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
@@ -40,8 +44,8 @@ export function formatHumanReadableDuration(ms: number) {
 
   const nonZeroComponents = components.filter((component) => component.value > 0);
 
-  const humanReadableParts = nonZeroComponents
-    .slice(0, 2)
+  const preciseComponents = isPrecise ? nonZeroComponents : nonZeroComponents.slice(0, 2);
+  const humanReadableParts = preciseComponents
     .map((component) => `${component.value} ${component.label}${component.value > 1 ? "s" : ""}`);
 
   return humanReadableParts.join(" ");
@@ -74,3 +78,21 @@ export function getTaskDuration(timestamps: timestamp[]) {
 
   return totalDuration;
 }
+
+export function checkForOverlaps(intervals: activityInterval[]) {
+  const overlaps: boolean[] = new Array(intervals.length).fill(false);
+
+  for (let i = 0; i < intervals.length; i++) {
+    for (let j = i + 1; j < intervals.length; j++) {
+      if (
+        (intervals[i].start < (intervals[j].end ?? Infinity) || !intervals[j].end) &&
+        (intervals[j].start < (intervals[i].end ?? Infinity) || !intervals[i].end)
+      ) {
+        overlaps[i] = true;
+        overlaps[j] = true;
+      }
+    }
+  }
+
+  return overlaps;
+};

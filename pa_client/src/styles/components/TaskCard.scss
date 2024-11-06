@@ -9,7 +9,7 @@
 
   transition: transform 0.1s ease-in-out;
   user-select: none;
-  height: 15rem;
+  height: 14rem;
 
   &.adder-tag {
     opacity: 0.3;
@@ -33,7 +33,7 @@
   overflow: hidden;
 
   text-overflow: ellipsis;
-  padding-right: 2rem;
+  padding-right: 4rem;
 }
 
 .tag-list {
@@ -99,10 +99,10 @@
 }
 
 .timer-info {
-  display: grid;
+  display: flex;
   justify-content: center;
   grid-template-columns: none;
-
+  gap: 1rem;
 
   >button {
     font-family: monospace;
@@ -123,22 +123,43 @@
   }
 
   .duration {
-    opacity: 0.6;
     justify-self: center;
-    padding: 0 1rem;
-    border-radius: 1rem;
-    color: var(--col-white);
-    background: var(--col-window-bg)
+    padding: 0;
+    color: var(--col-window-bg);
   }
 
   &.is-active {
-    display: grid;
-    align-items: center;
-    grid-template-rows: 1fr 1fr;
 
     button {
       span {
         color: var(--col-accent);
+      }
+    }
+  }
+
+  .interval-area {
+    position: relative;
+
+    button {
+      display: grid;
+      align-items: center;
+      background: none;
+      border: none;
+
+      svg {
+        width: 2rem;
+        height: 2rem;
+        color: var(--col-window-bg);
+        align-self: center;
+      }
+
+      p {
+        position: absolute;
+        top: 1.5rem;
+        opacity: 0.6;
+        font-size: 0.8rem;
+        font-family: monospace;
+        text-align: center;
       }
     }
   }
@@ -174,19 +195,46 @@
   }
 }
 
-.drag-handle {
+.task-modifiers {
   position: absolute;
   right: 1rem;
   top: 1rem;
-  opacity: 0.6;
 
-  svg {
-    color: var(--col-window-bg);
-    width: 2rem;
-    height: 2rem;
+  display: flex;
+  gap: 1rem;
+
+  .drag-handle {
+    opacity: 0.6;
+
+    svg {
+      color: var(--col-window-bg);
+      width: 2rem;
+      height: 2rem;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
-  &:hover {
-    opacity: 1;
+  .edit-task-btn {
+    >button {
+      opacity: 0.6;
+      border: none;
+      background: none;
+      display: grid;
+
+      svg {
+        color: var(--col-window-bg);
+        width: 1.3rem;
+        height: 1.3rem;
+      }
+
+      p {
+        font-size: 0.8rem;
+        font-family: monospace;
+        text-align: center;
+      }
+    }
   }
 }

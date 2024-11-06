@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import HeaderRoutes from "./HeaderRoutes";
 
 function Header() {
-  const scrollThreshold = 20;
+  const scrollThreshold = 50;
 
   const lastScrollY = useRef<number>(0);
   const headerRef = useRef<HTMLElement>(null);
