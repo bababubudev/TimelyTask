@@ -1,12 +1,13 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MdDragIndicator } from "react-icons/md";
-import { isFirefox } from "../utility/utilityComponent";
+import { formatHumanReadableDuration, isFirefox } from "../utility/utilityComponent";
 
 interface TaskCardProps {
   isAdderTag?: boolean;
   isOverlay?: boolean;
   isTaskActive?: boolean;
+  taskDuration?: number;
   taskId: number;
   taskTitle: string;
   taskTags: string[];
@@ -18,6 +19,7 @@ function TaskCard({
   isOverlay = false,
   isAdderTag = false,
   isTaskActive = false,
+  taskDuration = 0,
   taskId,
   taskTitle,
   taskTags,
@@ -44,6 +46,8 @@ function TaskCard({
     cursor: isDragging || isOverlay ? "grabbing" : "grab",
   };
 
+  const currentTaskDuration = taskDuration <= 0 ? "Not Active" : formatHumanReadableDuration(taskDuration);
+
   return (
     <div
       className={`
@@ -57,13 +61,13 @@ function TaskCard({
     >
       <h2 className="task-name">{taskTitle}</h2>
       {!isAdderTag &&
-        <button
-          onClick={(e) => { e.stopPropagation(); toggleTaskActiveState(taskId); }}
-          className={`status-container ${isTaskActive ? "is-active" : ""}`}
-        >
-          <span>{isTaskActive ? "Active" : "Inactive"}</span>
-          <span>•</span>
-        </button>
+        <div className={`timer-info ${isTaskActive ? "is-active" : ""}`}>
+          <button onClick={(e) => { e.stopPropagation(); toggleTaskActiveState(taskId); }}>
+            <p>{isTaskActive ? "Active" : "Inactive"}</p>
+            <span>•</span>
+          </button>
+          {isTaskActive && <p className="duration">{currentTaskDuration}</p>}
+        </div>
       }
       <div className="tag-list">
         {taskTags && taskTags.length > 0 ?

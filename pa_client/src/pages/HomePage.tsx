@@ -3,7 +3,7 @@ import Header from "../components/Header"
 import TaskCard from "../components/TaskCard";
 import TagFilter from "../components/TagFilter";
 import { mapIDsToNames } from "../utility/tagMapping";
-import { FilterType } from "../utility/types";
+import { FilterType, ModalType } from "../utility/types";
 import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 import {
   closestCorners,
@@ -20,37 +20,43 @@ import {
 import type { task } from "../utility/types";
 import { useData } from "../context/DataContext";
 import { useNavigate } from "react-router-dom";
+import { getTaskDuration, isNewData } from "../utility/utilityComponent";
+import Modal from "../components/Modal";
+import TaskForm from "../components/TaskForm";
 
-function Task() {
-  const emptyTask: task = {
-    id: -1,
-    name: "Add new task",
-    tags: "",
-  };
-
+function Home() {
   const {
     tasks,
     setAllTask,
+    setTaskAdd,
+
     tagMap,
+    setTagAddition,
 
     activeTasks,
     toggleActiveTask,
+    timestampMap,
 
     optionLoading,
     optionError
   } = useData();
 
+  const emptyTask: task = {
+    id: -1,
+    name: "",
+    tags: "",
+  };
+
   const [filteredTasks, setFilteredTasks] = useState<task[]>([]);
   const [draggedTask, setDraggedTask] = useState<task | undefined>(undefined);
 
-  // const [selectedTask, setSelectedTask] = useState<task>(emptyTask);
+  const [newTask, setNewTask] = useState<task>(emptyTask);
   // const [error, setError] = useState<Error | null>(null);
 
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
 
-  // const isEditTaskDisabled = selectedTask.name === "" ||
-  //   (selectedTask.id > -1 && !isNewData<task>(tasks, selectedTask));
+  const isSubmitDisabled = newTask.name === "" || !isNewData<task>(tasks, newTask);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -61,7 +67,6 @@ function Task() {
       },
     })
   );
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -215,6 +220,7 @@ function Task() {
                     key={i}
                     taskId={elem.id}
                     taskTitle={elem.name}
+                    taskDuration={getTaskDuration(timestampMap[elem.id])}
                     isTaskActive={activeTasks[elem.id]}
                     taskTags={mapIDsToNames(elem.tags, tagMap)}
                     onCardClicked={(id) => onCardClicked(id)}
@@ -228,10 +234,10 @@ function Task() {
             }
             <TaskCard
               isAdderTag={true}
-              taskId={emptyTask.id}
-              taskTitle={emptyTask.name}
+              taskId={-1}
+              taskTitle="Add a new task"
               taskTags={[""]}
-              onCardClicked={onCardClicked}
+              onCardClicked={() => { setIsEditorOpen(true); }}
               toggleTaskActiveState={() => { }}
             />
           </ul>
@@ -241,12 +247,34 @@ function Task() {
                 taskId={draggedTask.id}
                 taskTitle={draggedTask.name}
                 taskTags={mapIDsToNames(draggedTask.tags, tagMap)}
+                taskDuration={getTaskDuration(timestampMap[draggedTask.id])}
+                isTaskActive={activeTasks[draggedTask.id]}
                 onCardClicked={() => { }}
                 toggleTaskActiveState={toggleActiveTask}
               />
             ) : null}
           </DragOverlay>
         </DndContext>
+        <Modal
+          type={ModalType.form}
+          isOpen={isEditorOpen}
+          dialogue={"Add a task"}
+          description={
+            <TaskForm
+              isDisabled={isSubmitDisabled}
+              tagMap={tagMap}
+              selectedTask={newTask}
+              createTag={setTagAddition}
+              setSelectedTask={setNewTask}
+              handleTaskSubmission={() => { }}
+              removeTagWithID={() => { }}
+              removeSelectedTask={() => { }}
+            />
+          }
+          onConfirm={() => { setTaskAdd(newTask); setIsEditorOpen(false); }}
+          onCancel={() => setIsEditorOpen(false)}
+          zIndex={10}
+        />
         {optionLoading && <div className="loading-spinner">Loading...</div>}
         {optionError && <p className="error-message">{((optionError) as Error).message}</p>}
       </div>
@@ -254,4 +282,4 @@ function Task() {
   );
 }
 
-export default Task;
+export default Home;

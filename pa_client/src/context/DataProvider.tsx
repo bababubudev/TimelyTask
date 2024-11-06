@@ -34,7 +34,7 @@ function DataProvider({ children }: DataProviderProps) {
   }, []);
 
   useEffect(() => {
-    const fetchOptionsAndTags = async () => {
+    const fetchAllData = async () => {
       try {
         const [tasks, tags, timestamps, options] = await Promise.all([
           fetchData(`${BASE_URL}/tasks`),
@@ -56,13 +56,13 @@ function DataProvider({ children }: DataProviderProps) {
 
         tagsData.forEach((tag: tag) => { tagMap[tag.id] = tag.name });
 
-        timestampData.forEach((ts: timestamp) => {
-          if (!newstamp[ts.task]) {
-            newstamp[ts.task] = [];
+        timestampData.forEach((elem: timestamp) => {
+          if (!newstamp[elem.task]) {
+            newstamp[elem.task] = [];
           }
 
-          newstamp[ts.task].push(ts);
-          newActivity[ts.task] = ts.type === 1;
+          newstamp[elem.task].push(elem);
+          newActivity[elem.task] = elem.type === 0;
         });
 
         setTasks(tasksData);
@@ -76,7 +76,7 @@ function DataProvider({ children }: DataProviderProps) {
       }
     };
 
-    fetchOptionsAndTags();
+    fetchAllData();
   }, [fetchData]);
 
   const handleSetOptions = async (changes: Partial<options>) => {
@@ -211,7 +211,7 @@ function DataProvider({ children }: DataProviderProps) {
         body: JSON.stringify({
           timestamp: new Date().toISOString(),
           task: taskId,
-          type: isActive ? 0 : 1
+          type: isActive ? 1 : 0
         })
       });
 

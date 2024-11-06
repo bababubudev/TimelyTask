@@ -9,7 +9,7 @@
 
   transition: transform 0.1s ease-in-out;
   user-select: none;
-  height: 12rem;
+  height: 15rem;
 
   &.adder-tag {
     opacity: 0.3;
@@ -98,22 +98,49 @@
   }
 }
 
-.status-container {
-  justify-self: center;
+.timer-info {
+  display: grid;
+  justify-content: center;
+  grid-template-columns: none;
 
-  display: flex;
-  gap: 1rem;
 
-  font-size: 1rem;
-  border-radius: 1rem;
+  >button {
+    font-family: monospace;
+    justify-self: center;
+    align-self: center;
 
-  padding: 0.1rem 1rem;
-  border: none;
-  background: var(--col-window-bg);
-  color: var(--col-white);
+    display: flex;
+    gap: 1rem;
 
-  &.is-active span {
-    color: var(--col-primary);
+    border-radius: 1rem;
+    padding: 0.2rem 1rem;
+    padding-top: 0;
+
+    border: none;
+    background: var(--col-window-bg);
+    color: var(--col-white);
+
+  }
+
+  .duration {
+    opacity: 0.6;
+    justify-self: center;
+    padding: 0 1rem;
+    border-radius: 1rem;
+    color: var(--col-white);
+    background: var(--col-window-bg)
+  }
+
+  &.is-active {
+    display: grid;
+    align-items: center;
+    grid-template-rows: 1fr 1fr;
+
+    button {
+      span {
+        color: var(--col-accent);
+      }
+    }
   }
 }
 

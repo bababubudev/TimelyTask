@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { task } from "../utility/types";
 import { mapIDsToNames } from "../utility/tagMapping";
 import TaskCard from "../components/TaskCard";
+import { getTaskDuration } from "../utility/utilityComponent";
 
 function TaskPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,12 +24,11 @@ function TaskPage() {
 
     activeTasks,
     toggleActiveTask,
+    timestampMap,
 
     optionLoading,
     optionError
   } = useData();
-
-  console.log(id);
 
   useEffect(() => {
     if (id) {
@@ -58,6 +58,7 @@ function TaskPage() {
               taskId={selectedTask.id}
               taskTitle={selectedTask.name}
               taskTags={mapIDsToNames(selectedTask.tags, tagMap)}
+              taskDuration={getTaskDuration(timestampMap[selectedTask.id])}
               onCardClicked={() => { }}
               isTaskActive={activeTasks[selectedTask.id]}
               toggleTaskActiveState={toggleActiveTask}
@@ -71,6 +72,7 @@ function TaskPage() {
                 taskId={task.id}
                 taskTitle={task.name}
                 taskTags={mapIDsToNames(task.tags, tagMap)}
+                taskDuration={getTaskDuration(timestampMap[selectedTask.id])}
                 onCardClicked={() => { }}
                 isTaskActive={activeTasks[task.id]}
                 toggleTaskActiveState={toggleActiveTask}
